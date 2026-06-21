@@ -984,17 +984,11 @@ function renderEroticaSection() {
   const narrative = formatEroticaNarrative(
     fillEroticaText(sec.narrative, self, other, state.nameA, state.nameB)
   );
-  const actionsHtml = (sec.actions || []).map((a, i) => `
-    <div class="erotica-action">
-      <span class="erotica-action-label">▶ 现在就这样做${sec.actions.length > 1 ? ` · ${i + 1}` : ""}</span>
-      <p>${fillEroticaText(a.text, self, other, state.nameA, state.nameB)}</p>
-    </div>
-  `).join("");
 
-  $("#erotica-content").innerHTML = `<div class="erotica-narrative">${narrative}</div>${actionsHtml}`;
+  $("#erotica-content").innerHTML = `<div class="erotica-narrative">${narrative}</div>`;
   $("#erotica-content").scrollTop = 0;
 
-  $("#btn-erotica-done").textContent = idx >= total - 1 ? "做完了 · 故事结局" : "做完了 · 继续往下读";
+  $("#btn-erotica-done").textContent = idx >= total - 1 ? "故事结束" : "下一幕 →";
 }
 
 function startErotica(id) {
