@@ -1098,6 +1098,18 @@ body.in-game .app {
   color: #ffe8f0;
   font-weight: 500;
 }
+.erotica-play-bar {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+.erotica-play-bar .btn-ghost-sm {
+  flex: 1;
+  font-size: 0.78rem;
+  padding: 8px 10px;
+  border: 1px solid rgba(212, 86, 122, 0.35);
+  background: rgba(212, 86, 122, 0.08);
+}
 .erotica-footer {
   flex-shrink: 0;
   padding: 12px 14px 20px;
@@ -1106,6 +1118,7 @@ body.in-game .app {
   flex-direction: column;
   gap: 8px;
 }
+#btn-erotica-random { margin-bottom: 12px; }
 #screen-erotica-read.active { padding: 0; }
 .pick-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px; border: 1px solid var(--glass-border); border-radius: 14px; background: rgba(0,0,0,0.2); cursor: pointer; font-family: inherit; color: var(--text); text-align: left; }
 .pick-item em { font-style: normal; font-size: 1.4rem; }

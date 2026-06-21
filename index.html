@@ -25,7 +25,7 @@
       <header class="hero">
         <p class="eyebrow">成年情侣 · 私密游戏</p>
         <h1>蜜语</h1>
-        <p class="subtitle">九章闯关 · 联机同房 · 语音倒计时</p>
+        <p class="subtitle">情欲闯关 · 边读边做 · 联机同房</p>
       </header>
       <form id="setup-form" class="setup-card glass">
         <div class="field-row">
@@ -73,7 +73,10 @@
           <em>📖</em><strong>场景故事</strong><small>34 种剧情 · 四幕循序渐进</small>
         </button>
         <button class="hub-card featured" data-mode="erotica">
-          <em>🔞</em><strong>情欲沉浸</strong><small>34 篇沉浸小说 · 纯场景叙事</small>
+          <em>🔞</em><strong>情欲沉浸</strong><small>34 篇小说 · 边读边做 · 配套色牌</small>
+        </button>
+        <button class="hub-card featured" data-mode="midnight">
+          <em>🌙</em><strong>深夜快闪</strong><small>随机故事 + 深度色牌 · 零铺垫开干</small>
         </button>
         <button class="hub-card" data-mode="free">
           <em>🃏</em><strong>自由模式</strong><small>卡牌/骰子/轮盘/盲选/情境</small>
@@ -115,6 +118,7 @@
                 <button class="sync-mode-btn" data-sync="pk">⚔️ PK</button>
                 <button class="sync-mode-btn" data-sync="daily">📅 每日</button>
                 <button class="sync-mode-btn" data-sync="story">📖 场景</button>
+                <button class="sync-mode-btn" data-sync="erotica">🔞 沉浸</button>
               </div>
             </div>
           </div>
@@ -133,7 +137,8 @@
     <section id="screen-erotica-pick" class="screen">
       <div class="pick-card glass">
         <h2>情欲沉浸</h2>
-        <p class="pick-sub">选一个地方，从头读到尾。叙事带你入戏，高亮块告诉你现在就该怎么做。</p>
+        <p class="pick-sub">选场景，读一段，做一段。每幕配有「此刻就做」指令，可换句、可抽色牌，不尴尬直接开干。</p>
+        <button type="button" id="btn-erotica-random" class="btn-secondary-full">🎲 随机抽一篇</button>
         <p class="scene-filter-label">地点</p>
         <div class="scene-filter-row scene-cat-row">
           <label class="scene-filter"><input type="radio" name="erotica-cat-filter" value="all" checked><span>全部</span></label>
@@ -164,7 +169,11 @@
         <div class="erotica-progress-bar"><div id="erotica-progress-fill" class="erotica-progress-fill"></div></div>
         <article id="erotica-content" class="erotica-content"></article>
         <footer class="erotica-footer">
-          <button id="btn-erotica-done" class="btn-primary">下一幕 →</button>
+          <div class="erotica-play-bar">
+            <button type="button" id="btn-erotica-refresh-play" class="btn-ghost-sm">🔄 换一句</button>
+            <button type="button" id="btn-erotica-fantasy-card" class="btn-ghost-sm">🃏 抽色牌</button>
+          </div>
+          <button id="btn-erotica-done" class="btn-primary">做完了 · 下一幕 →</button>
           <button id="btn-erotica-quit" class="btn-ghost">退出故事</button>
         </footer>
       </div>
@@ -222,7 +231,7 @@
           <div class="intensity-options compact">
             <label class="intensity-option"><input type="radio" name="intensity" value="warm"><span class="option-card"><em>🫦</em><strong>前戏</strong></span></label>
             <label class="intensity-option"><input type="radio" name="intensity" value="hot" checked><span class="option-card"><em>🔥</em><strong>火热</strong></span></label>
-            <label class="intensity-option"><input type="radio" name="intensity" value="deep"><span class="option-card"><em>💦</em><strong>深入</strong></span></label>
+            <label class="intensity-option"><input type="radio" name="intensity" value="deep"><span class="option-card"><em>💦</em><strong>深入</strong><small>最黄</small></span></label>
           </div>
         </fieldset>
         <fieldset id="scene-pick-field" class="scene-pick-field hidden">
@@ -442,6 +451,7 @@
   <script src="erotica.js"></script>
   <script src="erotica-extra.js"></script>
   <script src="erotica-extra-b.js"></script>
+  <script src="fantasy-packs.js"></script>
   <script src="profile.js"></script>
   <script src="voice.js"></script>
   <script src="sync.js"></script>

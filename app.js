@@ -11,7 +11,7 @@ const state = {
   recentCardTexts: [], recentScenarioTexts: [],
   sceneId: null, selectedSceneId: null, storyStages: [], storyData: null,
   stageIndex: 0, stageRoundIndex: 0,
-  eroticaId: null, eroticaData: null, eroticaSectionIndex: 0,
+  eroticaId: null, eroticaData: null, eroticaSectionIndex: 0, eroticaPlayVariant: 0,
 };
 
 const SAVE_KEY = "miyu-run-v2";
@@ -596,6 +596,23 @@ function resolveWheel(seg) {
   else if (seg.type === "dare") { $("#wheel-result").textContent = interpolate(pickScenario("dare")); }
   else if (seg.type === "whisper") { $("#wheel-result").textContent = interpolate(pickScenario("whisper")); }
   else if (seg.type === "swap") { state.currentPlayer = 1 - state.currentPlayer; $("#wheel-result").textContent = `换位！本轮由 ${getPlayerName(state.currentPlayer)} 主动`; }
+  else if (seg.type === "confess") { $("#wheel-result").textContent = interpolate(pickScenario("confess")); }
+  else if (seg.type === "fantasy") {
+    const self = getPlayerName(state.currentPlayer);
+    const other = getPlayerName(1 - state.currentPlayer);
+    const line = typeof drawFantasyCard === "function"
+      ? drawFantasyCard(getIntensity(), self, other, state.nameA, state.nameB)
+      : interpolate(pick(BONUS_CARDS));
+    $("#wheel-result").textContent = line;
+  }
+  else if (seg.type === "dom") {
+    const lv = getIntensity();
+    $("#wheel-result").textContent = interpolate(FANTASY_DOM_LINES?.[lv] || FANTASY_DOM_LINES?.hot || pick(BONUS_CARDS));
+  }
+  else if (seg.type === "edge") {
+    const lv = getIntensity();
+    $("#wheel-result").textContent = interpolate(FANTASY_EDGE_LINES?.[lv] || FANTASY_EDGE_LINES?.hot || pick(BONUS_CARDS));
+  }
   else if (CARDS[getIntensity()]?.[seg.type]) { $("#wheel-result").textContent = interpolate(pickCardText(getIntensity(), seg.type)); }
   else { $("#wheel-result").textContent = interpolate(pick(CARDS[getIntensity()].serve)); }
   enableActions(); updateHUD(); broadcastSync();
@@ -956,7 +973,7 @@ function renderEroticaList() {
         <strong>${s.name}</strong>
         <em>${s.tagline}</em>
         <p>${s.desc || getScene?.(s.id)?.desc || "沉浸式情色叙事，边读边做。"}</p>
-        <span class="scene-meta">${cat} · ${secs} 段 · 高亮指导</span>
+        <span class="scene-meta">${cat} · ${secs} 幕 · 边读边做</span>
         ${lastTag}
       </div>
     </button>`;
@@ -973,22 +990,83 @@ function renderEroticaSection() {
   const other = getPlayerName(1 - state.currentPlayer);
   const total = story.sections.length;
   const idx = state.eroticaSectionIndex;
+  const stageLabel = typeof getEroticaStageLabel === "function"
+    ? getEroticaStageLabel(idx, total) : "";
 
   document.documentElement.style.setProperty("--scene-accent", story.color || "#d4567a");
   $("#erotica-read-icon").textContent = story.icon;
   $("#erotica-read-title").textContent = story.name;
-  $("#erotica-read-section").textContent = sec.title;
+  $("#erotica-read-section").textContent = stageLabel ? `${sec.title} · ${stageLabel}` : sec.title;
   $("#erotica-read-progress").textContent = `${idx + 1} / ${total}`;
   $("#erotica-progress-fill").style.width = `${((idx + 1) / total) * 100}%`;
 
   const narrative = formatEroticaNarrative(
     fillEroticaText(sec.narrative, self, other, state.nameA, state.nameB)
   );
+  const playLine = typeof getEroticaPlayPrompt === "function"
+    ? getEroticaPlayPrompt(story, idx, self, other, state.nameA, state.nameB, state.eroticaPlayVariant)
+    : "";
+  const playHtml = playLine
+    ? `<div class="erotica-action" id="erotica-play-box">
+        <span class="erotica-action-label">▶ 此刻就做 · 轮到 ${self}</span>
+        <p id="erotica-play-text">${playLine}</p>
+      </div>`
+    : "";
 
-  $("#erotica-content").innerHTML = `<div class="erotica-narrative">${narrative}</div>`;
+  $("#erotica-content").innerHTML = `<div class="erotica-narrative">${narrative}</div>${playHtml}`;
   $("#erotica-content").scrollTop = 0;
 
-  $("#btn-erotica-done").textContent = idx >= total - 1 ? "故事结束" : "下一幕 →";
+  $("#btn-erotica-done").textContent = idx >= total - 1 ? "做完了 · 故事结束" : "做完了 · 下一幕 →";
+}
+
+function refreshEroticaPlay() {
+  state.eroticaPlayVariant = (state.eroticaPlayVariant || 0) + 1;
+  renderEroticaSection();
+  const box = $("#erotica-play-box");
+  if (box) {
+    box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    showToast("换了一句新的");
+  }
+}
+
+function drawEroticaFantasyCard() {
+  const story = state.eroticaData;
+  if (!story) return;
+  const self = getPlayerName(state.currentPlayer);
+  const other = getPlayerName(1 - state.currentPlayer);
+  const total = story.sections.length;
+  const idx = state.eroticaSectionIndex;
+  const intensity = typeof getEroticaIntensityForSection === "function"
+    ? getEroticaIntensityForSection(idx, total) : "hot";
+  const line = typeof drawFantasyCard === "function"
+    ? drawFantasyCard(intensity, self, other, state.nameA, state.nameB)
+    : interpolate(pick(CARDS[intensity]?.serve || CARDS.hot.serve));
+  const box = $("#erotica-play-box");
+  const textEl = $("#erotica-play-text");
+  const label = box?.querySelector(".erotica-action-label");
+  if (textEl) textEl.textContent = line;
+  if (label) label.textContent = `🃏 色牌加码 · ${INTENSITY_LABELS[intensity] || "火热"} · ${self}`;
+  if (box) box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  addHeat(8);
+  addLust(state.currentPlayer, 12);
+  showToast("抽了一张色牌");
+}
+
+function startRandomErotica() {
+  const list = getEroticaList();
+  if (!list.length) { showToast("暂无故事"); return; }
+  const story = pick(list);
+  startErotica(story.id);
+  showToast(`随机：${story.name}`, 2800);
+}
+
+function startMidnightRush() {
+  const list = getEroticaList();
+  if (!list.length) { showToast("暂无故事"); return; }
+  const story = pick(list);
+  state.intensity = "deep";
+  startErotica(story.id);
+  showToast(`深夜快闪 · ${story.name} · 深度色牌已就绪`, 3200);
 }
 
 function startErotica(id) {
@@ -998,6 +1076,7 @@ function startErotica(id) {
   state.eroticaId = id;
   state.eroticaData = story;
   state.eroticaSectionIndex = 0;
+  state.eroticaPlayVariant = 0;
   state.currentPlayer = 0;
   state.completed = 0;
   state.skipped = 0;
@@ -1014,6 +1093,7 @@ function advanceEroticaSection() {
   addLust(state.currentPlayer, 18);
   addLust(1 - state.currentPlayer, 10);
   state.eroticaSectionIndex++;
+  state.eroticaPlayVariant = 0;
   if (state.eroticaSectionIndex >= state.eroticaData.sections.length) {
     finishErotica();
     return;
@@ -1030,7 +1110,7 @@ function finishErotica() {
   $("#end-title").textContent = `${story?.name || "故事"} · 读毕`;
   $("#end-rank").textContent = story?.tagline || "";
   $("#end-stats").textContent = `完成 ${state.completed + 1} 段 · 全程沉浸`;
-  $("#end-message").textContent = "文字结束了，你们可以没完。";
+  $("#end-message").textContent = "文字结束了，身体可以没完。再抽一张色牌，或换一篇继续。";
   $("#end-xp").textContent = "+200 XP";
   profile.lastEroticaId = state.eroticaId;
   saveProfile();
@@ -1261,6 +1341,7 @@ $$(".hub-card").forEach((b) => b.addEventListener("click", () => {
   else if (m === "challenge") { renderChallengeList(); showScreen("challengePick"); }
   else if (m === "story") { renderSceneList(); showScreen("scenePick"); }
   else if (m === "erotica") { renderEroticaList(); showScreen("eroticaPick"); }
+  else if (m === "midnight") startMidnightRush();
   else if (m === "free") { populateSceneSelect(); updateFreeSceneField(); showScreen("freePick"); }
   else if (m === "custom") startCustomGame();
 }));
@@ -1304,6 +1385,7 @@ $$(".sync-mode-btn").forEach((b) => b.addEventListener("click", () => {
   else if (m === "pk") startPk();
   else if (m === "daily") startDaily();
   else if (m === "story") { renderSceneList(); showScreen("scenePick"); }
+  else if (m === "erotica") { renderEroticaList(); showScreen("eroticaPick"); }
 }));
 
 $("#btn-sync-back").addEventListener("click", () => {
@@ -1352,6 +1434,9 @@ $("#btn-erotica-quit").addEventListener("click", () => {
   if (confirm("退出当前故事？")) { showScreen("hub"); renderHub(); }
 });
 $("#btn-erotica-done").addEventListener("click", () => advanceEroticaSection());
+$("#btn-erotica-refresh-play")?.addEventListener("click", () => refreshEroticaPlay());
+$("#btn-erotica-fantasy-card")?.addEventListener("click", () => drawEroticaFantasyCard());
+$("#btn-erotica-random")?.addEventListener("click", () => startRandomErotica());
 $$('input[name="scene-filter"]').forEach((r) => r.addEventListener("change", renderSceneList));
 $$('input[name="scene-cat-filter"]').forEach((r) => r.addEventListener("change", renderSceneList));
 $$('input[name="erotica-cat-filter"]').forEach((r) => r.addEventListener("change", renderEroticaList));
