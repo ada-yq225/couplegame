@@ -1,4 +1,4 @@
-const CACHE = "miyu-v11";
+const CACHE = "miyu-v12";
 const ASSETS = [
   "./",
   "./index.html",
@@ -9,6 +9,9 @@ const ASSETS = [
   "./challenges.js",
   "./scenes.js",
   "./scenes-extra.js",
+  "./erotica.js",
+  "./erotica-extra.js",
+  "./erotica-extra-b.js",
   "./profile.js",
   "./voice.js",
   "./sync.js",

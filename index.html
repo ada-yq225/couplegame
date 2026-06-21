@@ -72,6 +72,9 @@
         <button class="hub-card featured" data-mode="story">
           <em>📖</em><strong>场景故事</strong><small>34 种剧情 · 四幕循序渐进</small>
         </button>
+        <button class="hub-card featured" data-mode="erotica">
+          <em>🔞</em><strong>情欲沉浸</strong><small>34 篇私密小说 · 高亮指导</small>
+        </button>
         <button class="hub-card" data-mode="free">
           <em>🃏</em><strong>自由模式</strong><small>卡牌/骰子/轮盘/盲选/情境</small>
         </button>
@@ -123,6 +126,47 @@
         </div>
         <p id="sync-err" class="sync-err"></p>
         <button id="btn-sync-back" class="btn-ghost">返回大厅</button>
+      </div>
+    </section>
+
+    <!-- 情欲沉浸选择 -->
+    <section id="screen-erotica-pick" class="screen">
+      <div class="pick-card glass">
+        <h2>情欲沉浸</h2>
+        <p class="pick-sub">选一个地方，从头读到尾。叙事带你入戏，高亮块告诉你现在就该怎么做。</p>
+        <p class="scene-filter-label">地点</p>
+        <div class="scene-filter-row scene-cat-row">
+          <label class="scene-filter"><input type="radio" name="erotica-cat-filter" value="all" checked><span>全部</span></label>
+          <label class="scene-filter"><input type="radio" name="erotica-cat-filter" value="public"><span>🏢 公共场所</span></label>
+          <label class="scene-filter"><input type="radio" name="erotica-cat-filter" value="vehicle"><span>🚗 交通工具</span></label>
+          <label class="scene-filter"><input type="radio" name="erotica-cat-filter" value="indoor"><span>🏠 室内私密</span></label>
+          <label class="scene-filter"><input type="radio" name="erotica-cat-filter" value="outdoor"><span>🌿 户外自然</span></label>
+        </div>
+        <div id="erotica-list" class="scene-list"></div>
+        <button id="btn-erotica-pick-back" class="btn-ghost">返回大厅</button>
+      </div>
+    </section>
+
+    <!-- 情欲沉浸阅读 -->
+    <section id="screen-erotica-read" class="screen">
+      <div class="erotica-reader glass">
+        <header class="erotica-header">
+          <button id="btn-erotica-read-back" class="btn-ghost erotica-back">←</button>
+          <div class="erotica-meta">
+            <span id="erotica-read-icon" class="erotica-read-icon">🔞</span>
+            <div>
+              <strong id="erotica-read-title">故事</strong>
+              <em id="erotica-read-section">第一幕</em>
+            </div>
+          </div>
+          <span id="erotica-read-progress" class="erotica-progress-text">1/5</span>
+        </header>
+        <div class="erotica-progress-bar"><div id="erotica-progress-fill" class="erotica-progress-fill"></div></div>
+        <article id="erotica-content" class="erotica-content"></article>
+        <footer class="erotica-footer">
+          <button id="btn-erotica-done" class="btn-primary">做完了 · 继续往下读</button>
+          <button id="btn-erotica-quit" class="btn-ghost">退出故事</button>
+        </footer>
       </div>
     </section>
 
@@ -395,6 +439,9 @@
   <script src="challenges.js"></script>
   <script src="scenes.js"></script>
   <script src="scenes-extra.js"></script>
+  <script src="erotica.js"></script>
+  <script src="erotica-extra.js"></script>
+  <script src="erotica-extra-b.js"></script>
   <script src="profile.js"></script>
   <script src="voice.js"></script>
   <script src="sync.js"></script>

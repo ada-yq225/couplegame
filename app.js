@@ -11,6 +11,7 @@ const state = {
   recentCardTexts: [], recentScenarioTexts: [],
   sceneId: null, selectedSceneId: null, storyStages: [], storyData: null,
   stageIndex: 0, stageRoundIndex: 0,
+  eroticaId: null, eroticaData: null, eroticaSectionIndex: 0,
 };
 
 const SAVE_KEY = "miyu-run-v2";
@@ -20,6 +21,7 @@ const $$ = (s) => document.querySelectorAll(s);
 const screens = {
   welcome: $("#screen-welcome"), hub: $("#screen-hub"), sync: $("#screen-sync"),
   challengePick: $("#screen-challenge-pick"), scenePick: $("#screen-scene-pick"),
+  eroticaPick: $("#screen-erotica-pick"), eroticaRead: $("#screen-erotica-read"),
   freePick: $("#screen-free-pick"),
   chapter: $("#screen-chapter"), game: $("#screen-game"), chapterClear: $("#screen-chapter-clear"),
   end: $("#screen-end"), achievements: $("#screen-achievements"), editor: $("#screen-editor"),
@@ -44,7 +46,8 @@ function isDaily() { return state.playStyle === "daily"; }
 function isChallenge() { return state.playStyle === "challenge"; }
 function isCustom() { return state.playStyle === "custom"; }
 function isStory() { return state.playStyle === "story"; }
-function isStructured() { return isCampaign() || isPk() || isDaily() || isChallenge() || isStory(); }
+function isErotica() { return state.playStyle === "erotica"; }
+function isStructured() { return isCampaign() || isPk() || isDaily() || isChallenge() || isStory() || isErotica(); }
 
 function getCurrentStoryStage() {
   return state.storyStages?.[state.stageIndex];
@@ -939,6 +942,107 @@ function getScenePeakIntensity(scene) {
   return peak;
 }
 
+function renderEroticaList() {
+  const catFilter = document.querySelector('input[name="erotica-cat-filter"]:checked')?.value || "all";
+  const list = getEroticaList().filter((s) => catFilter === "all" || (s.category || "indoor") === catFilter);
+  const last = profile.lastEroticaId;
+  $("#erotica-list").innerHTML = list.length ? list.map((s) => {
+    const secs = s.sections?.length || 5;
+    const cat = SCENE_CATEGORY_LABELS?.[s.category || "indoor"] || "";
+    const lastTag = last === s.id ? '<span class="scene-last">上次读过</span>' : "";
+    return `<button class="scene-card erotica-card" data-id="${s.id}" style="--scene-accent:${s.color || "#d4567a"}">
+      <span class="scene-icon">${s.icon}</span>
+      <div class="scene-body">
+        <strong>${s.name}</strong>
+        <em>${s.tagline}</em>
+        <p>${s.desc || getScene?.(s.id)?.desc || "沉浸式情色叙事，边读边做。"}</p>
+        <span class="scene-meta">${cat} · ${secs} 段 · 高亮指导</span>
+        ${lastTag}
+      </div>
+    </button>`;
+  }).join("") : '<p class="scene-empty">没有符合筛选的故事。</p>';
+  $$(".erotica-card").forEach((b) => b.addEventListener("click", () => startErotica(b.dataset.id)));
+}
+
+function renderEroticaSection() {
+  const story = state.eroticaData;
+  const sec = story?.sections?.[state.eroticaSectionIndex];
+  if (!story || !sec) return;
+
+  const self = getPlayerName(state.currentPlayer);
+  const other = getPlayerName(1 - state.currentPlayer);
+  const total = story.sections.length;
+  const idx = state.eroticaSectionIndex;
+
+  document.documentElement.style.setProperty("--scene-accent", story.color || "#d4567a");
+  $("#erotica-read-icon").textContent = story.icon;
+  $("#erotica-read-title").textContent = story.name;
+  $("#erotica-read-section").textContent = sec.title;
+  $("#erotica-read-progress").textContent = `${idx + 1} / ${total}`;
+  $("#erotica-progress-fill").style.width = `${((idx + 1) / total) * 100}%`;
+
+  const narrative = formatEroticaNarrative(
+    fillEroticaText(sec.narrative, self, other, state.nameA, state.nameB)
+  );
+  const actionsHtml = (sec.actions || []).map((a, i) => `
+    <div class="erotica-action">
+      <span class="erotica-action-label">▶ 现在就这样做${sec.actions.length > 1 ? ` · ${i + 1}` : ""}</span>
+      <p>${fillEroticaText(a.text, self, other, state.nameA, state.nameB)}</p>
+    </div>
+  `).join("");
+
+  $("#erotica-content").innerHTML = `<div class="erotica-narrative">${narrative}</div>${actionsHtml}`;
+  $("#erotica-content").scrollTop = 0;
+
+  $("#btn-erotica-done").textContent = idx >= total - 1 ? "做完了 · 故事结局" : "做完了 · 继续往下读";
+}
+
+function startErotica(id) {
+  const story = getErotica(id);
+  if (!story?.sections?.length) { showToast("故事不存在"); return; }
+  state.playStyle = "erotica";
+  state.eroticaId = id;
+  state.eroticaData = story;
+  state.eroticaSectionIndex = 0;
+  state.currentPlayer = 0;
+  state.completed = 0;
+  state.skipped = 0;
+  profile.lastEroticaId = id;
+  saveProfile();
+  renderEroticaSection();
+  showScreen("eroticaRead");
+  showToast(story.tagline, 3000);
+}
+
+function advanceEroticaSection() {
+  state.completed++;
+  addHeat(12);
+  addLust(state.currentPlayer, 18);
+  addLust(1 - state.currentPlayer, 10);
+  state.eroticaSectionIndex++;
+  if (state.eroticaSectionIndex >= state.eroticaData.sections.length) {
+    finishErotica();
+    return;
+  }
+  state.currentPlayer = 1 - state.currentPlayer;
+  renderEroticaSection();
+}
+
+function finishErotica() {
+  profile.gamesPlayed++;
+  addXP(200);
+  const story = state.eroticaData;
+  $("#end-emoji").textContent = story?.icon || "🔞";
+  $("#end-title").textContent = `${story?.name || "故事"} · 读毕`;
+  $("#end-rank").textContent = story?.tagline || "";
+  $("#end-stats").textContent = `完成 ${state.completed + 1} 段 · 全程沉浸`;
+  $("#end-message").textContent = "文字结束了，你们可以没完。";
+  $("#end-xp").textContent = "+200 XP";
+  profile.lastEroticaId = state.eroticaId;
+  saveProfile();
+  showScreen("end");
+}
+
 function renderSceneList() {
   const intensityFilter = document.querySelector('input[name="scene-filter"]:checked')?.value || "all";
   const catFilter = document.querySelector('input[name="scene-cat-filter"]:checked')?.value || "all";
@@ -1162,6 +1266,7 @@ $$(".hub-card").forEach((b) => b.addEventListener("click", () => {
   else if (m === "daily") startDaily();
   else if (m === "challenge") { renderChallengeList(); showScreen("challengePick"); }
   else if (m === "story") { renderSceneList(); showScreen("scenePick"); }
+  else if (m === "erotica") { renderEroticaList(); showScreen("eroticaPick"); }
   else if (m === "free") { populateSceneSelect(); updateFreeSceneField(); showScreen("freePick"); }
   else if (m === "custom") startCustomGame();
 }));
@@ -1245,8 +1350,17 @@ $("#btn-next-chapter").addEventListener("click", () => {
 $("#btn-clear-menu").addEventListener("click", () => { saveGame(); showScreen("hub"); renderHub(); });
 $("#btn-challenge-back").addEventListener("click", () => showScreen("hub"));
 $("#btn-scene-back").addEventListener("click", () => showScreen("hub"));
+$("#btn-erotica-pick-back").addEventListener("click", () => showScreen("hub"));
+$("#btn-erotica-read-back").addEventListener("click", () => {
+  if (confirm("退出当前故事？进度不会保存。")) { showScreen("eroticaPick"); renderEroticaList(); }
+});
+$("#btn-erotica-quit").addEventListener("click", () => {
+  if (confirm("退出当前故事？")) { showScreen("hub"); renderHub(); }
+});
+$("#btn-erotica-done").addEventListener("click", () => advanceEroticaSection());
 $$('input[name="scene-filter"]').forEach((r) => r.addEventListener("change", renderSceneList));
 $$('input[name="scene-cat-filter"]').forEach((r) => r.addEventListener("change", renderSceneList));
+$$('input[name="erotica-cat-filter"]').forEach((r) => r.addEventListener("change", renderEroticaList));
 $$('input[name="mode"]').forEach((r) => r.addEventListener("change", updateFreeSceneField));
 $("#btn-free-start").addEventListener("click", () => startFreeGame());
 $("#btn-free-back").addEventListener("click", () => showScreen("hub"));
