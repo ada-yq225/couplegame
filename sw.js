@@ -1,4 +1,4 @@
-const CACHE = "miyu-v20";
+const CACHE = "miyu-v21";
 const ASSETS = [
   "./",
   "./index.html",
