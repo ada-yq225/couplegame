@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="蜜语">
-  <meta name="theme-color" content="#d4567a">
+  <meta name="theme-color" content="#08060d">
   <title>蜜语 · 情侣游戏</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -17,12 +17,20 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="ambient"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+  <div class="ambient" aria-hidden="true">
+    <div class="ambient-mesh"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+    <div class="ambient-noise"></div>
+  </div>
 
   <main class="app">
     <!-- 登录 -->
     <section id="screen-welcome" class="screen active">
       <header class="hero">
+        <div class="brand-mark" aria-hidden="true">♥</div>
         <p class="eyebrow">成年情侣 · 私密游戏</p>
         <h1>蜜语</h1>
         <p class="subtitle">情欲闯关 · 边读边做 · 联机同房</p>
@@ -52,39 +60,54 @@
 
       <div class="hub-names" id="hub-names"></div>
 
-      <div class="hub-grid">
-        <button class="hub-card featured" data-mode="campaign">
-          <em>🎮</em><strong>闯关模式</strong><small id="campaign-hint">9章+隐藏章 · 多结局</small>
-        </button>
-        <p id="secret-unlock-hint" class="secret-hint"></p>
-        <button class="hub-card" data-mode="sync">
-          <em>📡</em><strong>异地同房</strong><small>两台手机实时同步</small>
-        </button>
-        <button class="hub-card" data-mode="pk">
-          <em>⚔️</em><strong>PK 对决</strong><small>15回合争胜负</small>
-        </button>
-        <button class="hub-card" data-mode="daily">
-          <em>📅</em><strong>每日挑战</strong><small id="daily-hint">今日任务</small>
-        </button>
-        <button class="hub-card" data-mode="challenge">
-          <em>🎯</em><strong>挑战模式</strong><small>10 种专题 · 每关独立文案</small>
-        </button>
-        <button class="hub-card featured" data-mode="story">
-          <em>📖</em><strong>场景故事</strong><small>34 种剧情 · 四幕循序渐进</small>
-        </button>
-        <button class="hub-card featured" data-mode="erotica">
-          <em>🔞</em><strong>情欲沉浸</strong><small>34 篇小说 · 边读边做 · 配套色牌</small>
-        </button>
-        <button class="hub-card featured" data-mode="midnight">
-          <em>🌙</em><strong>深夜快闪</strong><small>随机故事 + 极限色牌 · 最黄开干</small>
-        </button>
-        <button class="hub-card" data-mode="free">
-          <em>🃏</em><strong>自由模式</strong><small>卡牌/骰子/轮盘/盲选/情境/色牌</small>
-        </button>
-        <button class="hub-card" data-mode="custom">
-          <em>✨</em><strong>自定义关</strong><small>只玩你的卡牌</small>
-        </button>
-      </div>
+      <section class="hub-section">
+        <h3 class="hub-section-title"><span>精选玩法</span></h3>
+        <div class="hub-grid hub-grid-featured">
+          <button class="hub-card featured" data-mode="campaign">
+            <em>🎮</em><strong>闯关模式</strong><small id="campaign-hint">9章+隐藏章 · 多结局</small>
+          </button>
+          <p id="secret-unlock-hint" class="secret-hint"></p>
+          <button class="hub-card featured" data-mode="story">
+            <em>📖</em><strong>场景故事</strong><small>34 种剧情 · 四幕循序渐进</small>
+          </button>
+          <button class="hub-card featured accent" data-mode="erotica">
+            <em>🔞</em><strong>情欲沉浸</strong><small>34 篇小说 · 边读边做 · 配套色牌</small>
+          </button>
+          <button class="hub-card featured accent" data-mode="midnight">
+            <em>🌙</em><strong>深夜快闪</strong><small>随机故事 + 极限色牌 · 最黄开干</small>
+          </button>
+        </div>
+      </section>
+
+      <section class="hub-section">
+        <h3 class="hub-section-title"><span>联机 & 挑战</span></h3>
+        <div class="hub-grid">
+          <button class="hub-card" data-mode="sync">
+            <em>📡</em><strong>异地同房</strong><small>两台手机实时同步</small>
+          </button>
+          <button class="hub-card" data-mode="pk">
+            <em>⚔️</em><strong>PK 对决</strong><small>15回合争胜负</small>
+          </button>
+          <button class="hub-card" data-mode="daily">
+            <em>📅</em><strong>每日挑战</strong><small id="daily-hint">今日任务</small>
+          </button>
+          <button class="hub-card" data-mode="challenge">
+            <em>🎯</em><strong>挑战模式</strong><small>10 种专题 · 每关独立文案</small>
+          </button>
+        </div>
+      </section>
+
+      <section class="hub-section">
+        <h3 class="hub-section-title"><span>自由探索</span></h3>
+        <div class="hub-grid">
+          <button class="hub-card" data-mode="free">
+            <em>🃏</em><strong>自由模式</strong><small>卡牌/骰子/轮盘/盲选/情境/色牌</small>
+          </button>
+          <button class="hub-card" data-mode="custom">
+            <em>✨</em><strong>自定义关</strong><small>只玩你的卡牌</small>
+          </button>
+        </div>
+      </section>
 
       <div class="hub-settings glass">
         <label class="toggle-row"><input type="checkbox" id="toggle-voice" checked><span>🔊 语音倒计时</span></label>
@@ -431,6 +454,7 @@
 
   <div id="install-modal" class="modal">
     <div class="modal-sheet glass">
+      <div class="modal-handle" aria-hidden="true"></div>
       <h3>手机上玩</h3>
       <ol class="install-steps">
         <li>双击 <code>start-phone.bat</code></li>
