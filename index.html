@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="蜜语">
+  <meta name="theme-color" content="#d4567a">
+  <title>蜜语 · 情侣游戏</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+
+  <main class="app">
+    <!-- 登录 -->
+    <section id="screen-welcome" class="screen active">
+      <header class="hero">
+        <p class="eyebrow">成年情侣 · 私密游戏</p>
+        <h1>蜜语</h1>
+        <p class="subtitle">九章闯关 · 联机同房 · 语音倒计时</p>
+      </header>
+      <form id="setup-form" class="setup-card glass">
+        <div class="field-row">
+          <label><span>TA</span><input type="text" id="name-a" placeholder="名字" maxlength="12" required autocomplete="off"></label>
+          <span class="heart-divider">♥</span>
+          <label><span>你</span><input type="text" id="name-b" placeholder="名字" maxlength="12" required autocomplete="off"></label>
+        </div>
+        <label class="consent-check"><input type="checkbox" id="consent" required><span>双方成年、自愿，随时可停</span></label>
+        <button type="submit" class="btn-primary">进入游戏大厅</button>
+        <button type="button" id="btn-install-help" class="btn-link">📱 手机上玩</button>
+      </form>
+    </section>
+
+    <!-- 大厅 -->
+    <section id="screen-hub" class="screen">
+      <header class="hub-header">
+        <div class="hub-profile" id="hub-profile">
+          <span class="hub-lv">Lv.<b id="hub-level">1</b></span>
+          <div class="hub-xp-bar"><div id="hub-xp-fill" class="hub-xp-fill"></div></div>
+          <span class="hub-xp-text" id="hub-xp-text">0 XP</span>
+        </div>
+        <button id="btn-hub-diff" class="badge-btn" title="难度">标准</button>
+      </header>
+
+      <div class="hub-names" id="hub-names"></div>
+
+      <div class="hub-grid">
+        <button class="hub-card featured" data-mode="campaign">
+          <em>🎮</em><strong>闯关模式</strong><small id="campaign-hint">9章+隐藏章 · 多结局</small>
+        </button>
+        <p id="secret-unlock-hint" class="secret-hint"></p>
+        <button class="hub-card" data-mode="sync">
+          <em>📡</em><strong>异地同房</strong><small>两台手机实时同步</small>
+        </button>
+        <button class="hub-card" data-mode="pk">
+          <em>⚔️</em><strong>PK 对决</strong><small>15回合争胜负</small>
+        </button>
+        <button class="hub-card" data-mode="daily">
+          <em>📅</em><strong>每日挑战</strong><small id="daily-hint">今日任务</small>
+        </button>
+        <button class="hub-card" data-mode="challenge">
+          <em>🎯</em><strong>挑战模式</strong><small>10 种专题 · 每关独立文案</small>
+        </button>
+        <button class="hub-card" data-mode="free">
+          <em>🃏</em><strong>自由模式</strong><small>卡牌/骰子/轮盘/盲选/情境</small>
+        </button>
+        <button class="hub-card" data-mode="custom">
+          <em>✨</em><strong>自定义关</strong><small>只玩你的卡牌</small>
+        </button>
+      </div>
+
+      <div class="hub-settings glass">
+        <label class="toggle-row"><input type="checkbox" id="toggle-voice" checked><span>🔊 语音倒计时</span></label>
+        <label class="toggle-row"><input type="checkbox" id="toggle-custom" checked><span>混合自定义卡牌</span></label>
+      </div>
+
+      <div class="hub-tools">
+        <button id="btn-continue" class="btn-secondary-full hidden">继续闯关进度</button>
+        <button id="btn-achievements" class="tool-btn">🏅 成就</button>
+        <button id="btn-editor" class="tool-btn">✏️ 卡牌编辑</button>
+        <button id="btn-hub-back" class="tool-btn">⚙️ 换名字</button>
+      </div>
+    </section>
+
+    <!-- 联机同房 -->
+    <section id="screen-sync" class="screen">
+      <div class="pick-card glass">
+        <h2>📡 异地同房</h2>
+        <p class="sync-desc">两台设备联网即可同房（无需同一 WiFi）。一方创建房间，另一方输入房间码，主机选模式后双方同步画面。</p>
+        <div class="sync-panel">
+          <button id="btn-sync-host" class="btn-primary">创建房间（主机）</button>
+          <div id="sync-host-box" class="hidden">
+            <p class="room-code-label">房间码</p>
+            <p id="sync-room-code" class="room-code">------</p>
+            <p id="sync-wait-text" class="sync-wait">等待 TA 加入…</p>
+            <div id="sync-start-box" class="hidden">
+              <p class="sync-wait">对方已加入，主机选择模式：</p>
+              <div class="sync-mode-grid">
+                <button class="sync-mode-btn" data-sync="campaign">🎮 闯关</button>
+                <button class="sync-mode-btn" data-sync="free">🃏 自由</button>
+                <button class="sync-mode-btn" data-sync="pk">⚔️ PK</button>
+                <button class="sync-mode-btn" data-sync="daily">📅 每日</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sync-divider">或</div>
+        <div class="sync-join">
+          <input id="sync-join-code" type="text" maxlength="6" placeholder="输入 6 位房间码" autocomplete="off">
+          <button id="btn-sync-join" class="btn-primary">加入房间（副机）</button>
+        </div>
+        <p id="sync-err" class="sync-err"></p>
+        <button id="btn-sync-back" class="btn-ghost">返回大厅</button>
+      </div>
+    </section>
+
+    <!-- 挑战选择 -->
+    <section id="screen-challenge-pick" class="screen">
+      <div class="pick-card glass">
+        <h2>选择挑战专题</h2>
+        <p class="pick-sub">每关有独立任务与提示文案，共 10 种玩法</p>
+        <div id="challenge-list" class="pick-list"></div>
+        <button id="btn-challenge-back" class="btn-ghost">返回大厅</button>
+      </div>
+    </section>
+
+    <!-- 自由模式设置 -->
+    <section id="screen-free-pick" class="screen">
+      <div class="pick-card glass">
+        <h2>自由模式</h2>
+        <fieldset class="mode-picker">
+          <div class="mode-grid">
+            <label class="mode-option"><input type="radio" name="mode" value="cards" checked><span class="mode-card"><em>🃏</em><strong>卡牌</strong></span></label>
+            <label class="mode-option"><input type="radio" name="mode" value="dice"><span class="mode-card"><em>🎲</em><strong>骰子</strong></span></label>
+            <label class="mode-option"><input type="radio" name="mode" value="wheel"><span class="mode-card"><em>🎡</em><strong>轮盘</strong></span></label>
+            <label class="mode-option"><input type="radio" name="mode" value="mystery"><span class="mode-card"><em>🎭</em><strong>盲选</strong></span></label>
+            <label class="mode-option"><input type="radio" name="mode" value="scenario"><span class="mode-card"><em>🎬</em><strong>情境</strong></span></label>
+          </div>
+        </fieldset>
+        <fieldset class="intensity-picker">
+          <div class="intensity-options compact">
+            <label class="intensity-option"><input type="radio" name="intensity" value="warm"><span class="option-card"><em>🫦</em><strong>前戏</strong></span></label>
+            <label class="intensity-option"><input type="radio" name="intensity" value="hot" checked><span class="option-card"><em>🔥</em><strong>火热</strong></span></label>
+            <label class="intensity-option"><input type="radio" name="intensity" value="deep"><span class="option-card"><em>💦</em><strong>深入</strong></span></label>
+          </div>
+        </fieldset>
+        <button id="btn-free-start" class="btn-primary">开始</button>
+        <button id="btn-free-back" class="btn-ghost">返回</button>
+      </div>
+    </section>
+
+    <!-- 章节开场 -->
+    <section id="screen-chapter" class="screen">
+      <div class="chapter-card glass">
+        <p id="chapter-icon" class="chapter-icon">🌙</p>
+        <p class="chapter-label">章节开始</p>
+        <h2 id="chapter-title">第一夜</h2>
+        <p id="chapter-desc" class="chapter-desc"></p>
+        <div class="chapter-meta">
+          <span id="chapter-rounds">5 关 + Boss</span>
+          <span id="chapter-intensity" class="badge"></span>
+        </div>
+        <button id="btn-chapter-start" class="btn-primary">进入章节</button>
+      </div>
+    </section>
+
+    <!-- 游戏 -->
+    <section id="screen-game" class="screen">
+      <span id="sync-status" class="sync-status hidden">未连接</span>
+
+      <header class="game-header">
+        <button id="btn-back" class="btn-ghost">←</button>
+        <div class="player-badge">
+          <span id="current-player" class="player-name"></span>
+          <span class="turn-label"></span>
+        </div>
+        <button id="btn-settings" class="btn-ghost">🎮</button>
+      </header>
+
+      <div id="event-banner" class="event-banner hidden"></div>
+
+      <div class="hud-bar">
+        <div class="hud-top">
+          <span id="mode-badge" class="badge"></span>
+          <span id="intensity-badge" class="badge"></span>
+          <span id="streak-badge" class="badge streak"></span>
+          <span id="card-counter" class="counter"></span>
+        </div>
+        <div id="campaign-hud" class="campaign-hud hidden">
+          <div class="lust-row"><span class="lust-name" id="lust-name-a"></span><div class="lust-bar"><div id="lust-a" class="lust-fill"></div></div></div>
+          <div class="lust-row"><span class="lust-name" id="lust-name-b"></span><div class="lust-bar"><div id="lust-b" class="lust-fill b"></div></div></div>
+        </div>
+        <div class="heat-bar"><div id="heat-fill" class="heat-fill"></div><span id="heat-label" class="heat-label">热度 0%</span></div>
+        <div class="score-row">
+          <span><b id="score-a">0</b> <small id="score-name-a"></small></span>
+          <span class="score-vs">:</span>
+          <span><small id="score-name-b"></small> <b id="score-b">0</b></span>
+        </div>
+        <div id="items-bar" class="items-bar"></div>
+      </div>
+
+      <div class="game-stage">
+        <div id="panel-cards" class="game-panel active">
+          <div id="card" class="game-card" role="button" tabindex="0">
+            <div class="card-inner">
+              <div class="card-face card-back">
+                <div class="card-pattern"></div><p>轻触翻开</p><p class="swipe-hint">或向上滑</p>
+                <span class="card-type-hint" id="type-hint"></span>
+              </div>
+              <div class="card-face card-front">
+                <span class="card-label" id="card-label"></span>
+                <p class="card-text" id="card-text"></p>
+                <div id="choice-options" class="choice-options"></div>
+                <span class="card-for" id="card-for"></span>
+              </div>
+            </div>
+          </div>
+          <p id="peek-preview" class="peek-preview hidden"></p>
+        </div>
+        <div id="panel-dice" class="game-panel">
+          <div class="dice-area">
+            <div class="dice-box"><p class="dice-tag">部位</p><div id="dice-part" class="dice-face">?</div></div>
+            <span class="dice-x">×</span>
+            <div class="dice-box"><p class="dice-tag">动作</p><div id="dice-action" class="dice-face">?</div></div>
+          </div>
+          <p id="dice-result" class="panel-result">点按钮掷骰</p>
+          <p id="dice-for" class="panel-for"></p>
+          <button id="btn-roll" class="btn-primary btn-inline">🎲 掷骰子</button>
+        </div>
+        <div id="panel-wheel" class="game-panel">
+          <div class="wheel-wrap">
+            <div class="wheel-pointer">▼</div>
+            <div id="wheel-disk" class="wheel-disk">
+              <div class="wheel-seg" style="--i:0">服侍</div><div class="wheel-seg" style="--i:1">享受</div>
+              <div class="wheel-seg" style="--i:2">一起</div><div class="wheel-seg" style="--i:3">掷骰</div>
+              <div class="wheel-seg" style="--i:4">限时</div><div class="wheel-seg" style="--i:5">脱一件</div>
+              <div class="wheel-seg" style="--i:6">加码</div><div class="wheel-seg" style="--i:7">服侍</div>
+            </div>
+          </div>
+          <p id="wheel-result" class="panel-result">转轮决定命运</p>
+          <p id="wheel-for" class="panel-for"></p>
+          <button id="btn-spin" class="btn-primary btn-inline">🎡 转轮盘</button>
+        </div>
+        <div id="panel-mystery" class="game-panel">
+          <div class="mystery-row">
+            <div class="mystery-card" data-idx="0"><span class="mystery-back">?</span><span class="mystery-front"></span></div>
+            <div class="mystery-card" data-idx="1"><span class="mystery-back">?</span><span class="mystery-front"></span></div>
+            <div class="mystery-card" data-idx="2"><span class="mystery-back">?</span><span class="mystery-front"></span></div>
+          </div>
+          <p id="mystery-result" class="panel-result">选一张，选中就必须做</p>
+          <p id="mystery-for" class="panel-for"></p>
+        </div>
+      </div>
+
+      <div id="timer-overlay" class="timer-overlay"><span id="timer-display" class="timer-display">60</span><span class="timer-label">秒</span></div>
+
+      <div class="action-bar">
+        <button id="btn-skip" class="btn-secondary">跳过</button>
+        <button id="btn-done" class="btn-primary" disabled>做完了</button>
+        <button id="btn-next" class="btn-ghost-sm" disabled>下一张</button>
+      </div>
+    </section>
+
+    <!-- PK 判定 -->
+    <div id="pk-judge" class="modal">
+      <div class="modal-sheet glass pk-sheet">
+        <h3>谁更猛？</h3>
+        <p class="pk-hint">诚实判定本回合表现</p>
+        <div class="pk-btns">
+          <button id="pk-pick-a" class="btn-primary"></button>
+          <button id="pk-pick-b" class="btn-primary alt"></button>
+        </div>
+        <button id="pk-draw" class="btn-ghost">平局，各 +15 分</button>
+      </div>
+    </div>
+
+    <!-- 章节通关 -->
+    <section id="screen-chapter-clear" class="screen">
+      <div class="end-card glass">
+        <p class="end-emoji" id="clear-stars">⭐⭐⭐</p>
+        <h2 id="clear-title">章节通关</h2>
+        <p class="end-stats" id="clear-stats"></p>
+        <p class="end-message" id="clear-msg"></p>
+        <button id="btn-next-chapter" class="btn-primary">下一章</button>
+        <button id="btn-clear-menu" class="btn-ghost">回大厅</button>
+      </div>
+    </section>
+
+    <!-- 结算 -->
+    <section id="screen-end" class="screen">
+      <div class="end-card glass">
+        <p class="end-emoji" id="end-emoji">🏆</p>
+        <h2 id="end-title">通关！</h2>
+        <p class="end-rank" id="end-rank"></p>
+        <p class="end-stats" id="end-stats"></p>
+        <p class="end-message" id="end-message"></p>
+        <p class="end-xp" id="end-xp"></p>
+        <button id="btn-restart" class="btn-primary">再玩一次</button>
+        <button id="btn-new-setup" class="btn-ghost">回大厅</button>
+      </div>
+    </section>
+
+    <!-- 成就 -->
+    <section id="screen-achievements" class="screen">
+      <div class="sub-screen glass">
+        <header class="sub-header"><button class="btn-ghost sub-back" data-back="hub">←</button><h2>成就</h2><span id="ach-count" class="badge"></span></header>
+        <div id="ach-list" class="ach-list"></div>
+      </div>
+    </section>
+
+    <!-- 编辑器 -->
+    <section id="screen-editor" class="screen">
+      <div class="sub-screen glass">
+        <header class="sub-header"><button class="btn-ghost sub-back" data-back="hub">←</button><h2>卡牌编辑</h2></header>
+        <form id="editor-form" class="editor-form">
+          <textarea id="editor-text" placeholder="输入指令内容，可用 {other} {self}" rows="3" maxlength="200" required></textarea>
+          <div class="editor-row">
+            <select id="editor-type"><option value="serve">服侍</option><option value="receive">享受</option><option value="sync">一起</option></select>
+            <select id="editor-intensity"><option value="warm">前戏</option><option value="hot" selected>火热</option><option value="deep">深入</option></select>
+          </div>
+          <button type="submit" class="btn-primary">添加卡牌</button>
+        </form>
+        <label class="consent-check"><input type="checkbox" id="editor-mix" checked><span>混合到游戏中</span></label>
+        <div id="editor-list" class="editor-list"></div>
+        <div class="editor-io">
+          <button id="btn-export" class="tool-btn">导出 JSON</button>
+          <button id="btn-import" class="tool-btn">导入 JSON</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <div id="install-modal" class="modal">
+    <div class="modal-sheet glass">
+      <h3>手机上玩</h3>
+      <ol class="install-steps">
+        <li>双击 <code>start-phone.bat</code></li>
+        <li>同一 WiFi</li>
+        <li>手机浏览器打开地址</li>
+        <li>添加到主屏幕</li>
+      </ol>
+      <button id="btn-close-modal" class="btn-primary">知道了</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script src="data.js"></script>
+  <script src="content-extra.js"></script>
+  <script src="challenges.js"></script>
+  <script src="profile.js"></script>
+  <script src="voice.js"></script>
+  <script src="sync.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
