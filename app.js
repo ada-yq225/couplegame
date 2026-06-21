@@ -547,6 +547,9 @@ function startTimer(sec, silent) {
 function stopTimer() { if (state.timerId) clearInterval(state.timerId); state.timerId = null; $("#timer-display")?.classList.remove("urgent"); }
 
 function presentCard() {
+  if (!isStructured() && !state.deck.length && state.mode === "cards" && state.playStyle === "free") {
+    state.deck = buildDeck();
+  }
   if (!isStructured() && !state.deck.length && state.mode !== "scenario") { endGame(); return; }
   resetCardUI();
   if (state.mode === "scenario" && !isStructured()) {
@@ -1270,13 +1273,14 @@ function startFreeGame() {
   state.mode = document.querySelector('input[name="mode"]:checked').value;
   state.selectedSceneId = state.mode === "scenario" ? ($("#free-scene-select")?.value || "") : "";
   if (state.selectedSceneId) profile.lastSceneId = state.selectedSceneId;
-  if (state.mode === "cards") state.deck = buildDeck();
-  else if (state.mode === "scenario") state.deck = buildScenarioDeck();
-  else state.deck = [];
   state.currentPlayer = Math.random() < 0.5 ? 0 : 1;
   state.completed = 0; state.skipped = 0; state.round = 0; state.heat = 0; state.streak = 0;
   state.scoreA = 0; state.scoreB = 0; state.noSkip = !getDiff().skipAllowed;
-  resetRun(); showScreen("game"); startRound();
+  resetRun();
+  if (state.mode === "cards") state.deck = buildDeck();
+  else if (state.mode === "scenario") state.deck = buildScenarioDeck();
+  else state.deck = [];
+  showScreen("game"); startRound();
 }
 
 function startCustomGame() {
