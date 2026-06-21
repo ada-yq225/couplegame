@@ -45,6 +45,7 @@ function isPk() { return state.playStyle === "pk"; }
 function isDaily() { return state.playStyle === "daily"; }
 function isChallenge() { return state.playStyle === "challenge"; }
 function isCustom() { return state.playStyle === "custom"; }
+function isFree() { return state.playStyle === "free"; }
 function isStory() { return state.playStyle === "story"; }
 function isErotica() { return state.playStyle === "erotica"; }
 function isStructured() { return isCampaign() || isPk() || isDaily() || isChallenge() || isStory() || isErotica(); }
@@ -362,6 +363,7 @@ function addScore(p, pts) {
 }
 
 function getCampaignRound() {
+  if (isFree() || isCustom()) return null;
   if (state.isBossRound) return { mode: "boss" };
   if (isDaily()) return state.dailyRounds[state.roundInChapter];
   if (isChallenge()) {
@@ -441,7 +443,10 @@ function buildScenarioDeck() {
 }
 
 function buildDeck() {
-  const intensity = getIntensity(), pool = CARDS[intensity], entries = [];
+  const intensity = getIntensity() || "hot";
+  const pool = CARDS[intensity] || CARDS.hot;
+  if (!pool) return [];
+  const entries = [];
   for (const [type, items] of Object.entries(pool)) items.forEach((text) => entries.push({ kind: "normal", type, text }));
   const spec = SPECIAL_CARDS;
   spec.timer.items[intensity].forEach((text) => entries.push({ kind: "timer", type: "serve", text, seconds: pick([45, 60, 90, 120]) }));
@@ -547,16 +552,22 @@ function startTimer(sec, silent) {
 function stopTimer() { if (state.timerId) clearInterval(state.timerId); state.timerId = null; $("#timer-display")?.classList.remove("urgent"); }
 
 function presentCard() {
-  if (!isStructured() && !state.deck.length && state.mode === "cards" && state.playStyle === "free") {
-    state.deck = buildDeck();
-  }
-  if (!isStructured() && !state.deck.length && state.mode !== "scenario") { endGame(); return; }
   resetCardUI();
   if (state.mode === "scenario" && !isStructured()) {
     if (!state.deck.length) state.deck = buildScenarioDeck();
     state.currentCard = state.deck.length ? state.deck.splice(0, 1)[0] : drawScenarioCard();
+  } else if (isStructured() || isCustom()) {
+    state.currentCard = drawCampaignCard();
+  } else if (state.mode === "cards") {
+    if (!state.deck.length) state.deck = buildDeck();
+    if (!state.deck.length) {
+      showToast("牌库加载失败，请刷新页面重试");
+      return;
+    }
+    state.currentCard = drawCard();
+    if (!state.currentCard) { endGame(); return; }
   } else {
-    state.currentCard = isStructured() || isCustom() ? drawCampaignCard() : drawCard();
+    return;
   }
   if (!isStructured()) state.round++;
   setPlayerHeader(state.currentCard); updateHUD();
@@ -1177,6 +1188,7 @@ function updateFreeSceneField() {
 }
 
 function getPlayMode() {
+  if (isFree() || isCustom()) return state.mode;
   if (state.forceMode) return state.forceMode;
   if (state.dailyMod?.modeLock) return state.dailyMod.modeLock;
   const r = getCampaignRound();
@@ -1269,8 +1281,13 @@ function startChallenge(id) {
 function startFreeGame() {
   state.playStyle = "free";
   state.sceneId = null;
-  state.intensity = document.querySelector('input[name="intensity"]:checked').value;
-  state.mode = document.querySelector('input[name="mode"]:checked').value;
+  state.isBossRound = false;
+  state.forceMode = null;
+  state.chapterIndex = 0;
+  state.roundInChapter = 0;
+  state.dailyMod = null;
+  state.intensity = document.querySelector('input[name="intensity"]:checked')?.value || "hot";
+  state.mode = document.querySelector('input[name="mode"]:checked')?.value || "cards";
   state.selectedSceneId = state.mode === "scenario" ? ($("#free-scene-select")?.value || "") : "";
   if (state.selectedSceneId) profile.lastSceneId = state.selectedSceneId;
   state.currentPlayer = Math.random() < 0.5 ? 0 : 1;
