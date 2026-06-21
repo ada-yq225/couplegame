@@ -18,12 +18,8 @@
 </head>
 <body>
   <div class="ambient" aria-hidden="true">
-    <div class="ambient-mesh"></div>
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-    <div class="orb orb-4"></div>
-    <div class="ambient-noise"></div>
   </div>
 
   <main class="app">
@@ -48,78 +44,103 @@
     </section>
 
     <!-- 大厅 -->
-    <section id="screen-hub" class="screen">
-      <header class="hub-header">
-        <div class="hub-profile" id="hub-profile">
-          <span class="hub-lv">Lv.<b id="hub-level">1</b></span>
-          <div class="hub-xp-bar"><div id="hub-xp-fill" class="hub-xp-fill"></div></div>
-          <span class="hub-xp-text" id="hub-xp-text">0 XP</span>
+    <section id="screen-hub" class="screen hub-screen">
+      <header class="hub-topbar">
+        <div class="hub-topbar-main">
+          <p class="hub-app-title">蜜语</p>
+          <p class="hub-names" id="hub-names"></p>
         </div>
-        <button id="btn-hub-diff" class="badge-btn" title="难度">标准</button>
+        <button id="btn-hub-diff" class="pill-btn" title="难度">标准</button>
       </header>
 
-      <div class="hub-names" id="hub-names"></div>
+      <div class="hub-xp-strip surface" id="hub-profile">
+        <span class="hub-lv">Lv.<b id="hub-level">1</b></span>
+        <div class="hub-xp-bar"><div id="hub-xp-fill" class="hub-xp-fill"></div></div>
+        <span class="hub-xp-text" id="hub-xp-text">0 XP</span>
+      </div>
 
-      <section class="hub-section">
-        <h3 class="hub-section-title"><span>精选玩法</span></h3>
-        <div class="hub-grid hub-grid-featured">
-          <button class="hub-card featured" data-mode="campaign">
-            <em>🎮</em><strong>闯关模式</strong><small id="campaign-hint">9章+隐藏章 · 多结局</small>
+      <div class="hub-hero-group">
+        <button class="hub-card hub-hero" data-mode="erotica">
+          <span class="hub-icon">🔞</span>
+          <span class="hub-hero-copy">
+            <span class="hub-hero-tag">推荐</span>
+            <strong>情欲沉浸</strong>
+            <small>34 篇小说 · 边读边做 · 配套色牌</small>
+          </span>
+        </button>
+        <button class="hub-card hub-hero hub-hero-muted" data-mode="midnight">
+          <span class="hub-icon">🌙</span>
+          <span class="hub-hero-copy">
+            <strong>深夜快闪</strong>
+            <small>随机故事 + 极限色牌</small>
+          </span>
+        </button>
+      </div>
+
+      <div class="hub-block">
+        <p class="hub-block-label">核心玩法</p>
+        <div class="surface-list">
+          <button class="hub-card hub-row" data-mode="campaign">
+            <span class="hub-icon">🎮</span>
+            <span class="hub-row-copy"><strong>闯关模式</strong><small id="campaign-hint">9章+隐藏章 · 多结局</small></span>
           </button>
           <p id="secret-unlock-hint" class="secret-hint"></p>
-          <button class="hub-card featured" data-mode="story">
-            <em>📖</em><strong>场景故事</strong><small>34 种剧情 · 四幕循序渐进</small>
-          </button>
-          <button class="hub-card featured accent" data-mode="erotica">
-            <em>🔞</em><strong>情欲沉浸</strong><small>34 篇小说 · 边读边做 · 配套色牌</small>
-          </button>
-          <button class="hub-card featured accent" data-mode="midnight">
-            <em>🌙</em><strong>深夜快闪</strong><small>随机故事 + 极限色牌 · 最黄开干</small>
+          <button class="hub-card hub-row" data-mode="story">
+            <span class="hub-icon">📖</span>
+            <span class="hub-row-copy"><strong>场景故事</strong><small>34 种剧情 · 四幕循序渐进</small></span>
           </button>
         </div>
-      </section>
+      </div>
 
-      <section class="hub-section">
-        <h3 class="hub-section-title"><span>联机 & 挑战</span></h3>
-        <div class="hub-grid">
-          <button class="hub-card" data-mode="sync">
-            <em>📡</em><strong>异地同房</strong><small>两台手机实时同步</small>
+      <div class="hub-block">
+        <p class="hub-block-label">联机与挑战</p>
+        <div class="surface-list">
+          <button class="hub-card hub-row" data-mode="sync">
+            <span class="hub-icon">📡</span>
+            <span class="hub-row-copy"><strong>异地同房</strong><small>两台手机实时同步</small></span>
           </button>
-          <button class="hub-card" data-mode="pk">
-            <em>⚔️</em><strong>PK 对决</strong><small>15回合争胜负</small>
+          <button class="hub-card hub-row" data-mode="pk">
+            <span class="hub-icon">⚔️</span>
+            <span class="hub-row-copy"><strong>PK 对决</strong><small>15 回合争胜负</small></span>
           </button>
-          <button class="hub-card" data-mode="daily">
-            <em>📅</em><strong>每日挑战</strong><small id="daily-hint">今日任务</small>
+          <button class="hub-card hub-row" data-mode="daily">
+            <span class="hub-icon">📅</span>
+            <span class="hub-row-copy"><strong>每日挑战</strong><small id="daily-hint">今日任务</small></span>
           </button>
-          <button class="hub-card" data-mode="challenge">
-            <em>🎯</em><strong>挑战模式</strong><small>10 种专题 · 每关独立文案</small>
+          <button class="hub-card hub-row" data-mode="challenge">
+            <span class="hub-icon">🎯</span>
+            <span class="hub-row-copy"><strong>挑战模式</strong><small>10 种专题 · 每关独立文案</small></span>
           </button>
         </div>
-      </section>
+      </div>
 
-      <section class="hub-section">
-        <h3 class="hub-section-title"><span>自由探索</span></h3>
-        <div class="hub-grid">
-          <button class="hub-card" data-mode="free">
-            <em>🃏</em><strong>自由模式</strong><small>卡牌/骰子/轮盘/盲选/情境/色牌</small>
+      <div class="hub-block">
+        <p class="hub-block-label">自由探索</p>
+        <div class="surface-list">
+          <button class="hub-card hub-row" data-mode="free">
+            <span class="hub-icon">🃏</span>
+            <span class="hub-row-copy"><strong>自由模式</strong><small>卡牌 / 骰子 / 轮盘 / 盲选 / 情境</small></span>
           </button>
-          <button class="hub-card" data-mode="custom">
-            <em>✨</em><strong>自定义关</strong><small>只玩你的卡牌</small>
+          <button class="hub-card hub-row" data-mode="custom">
+            <span class="hub-icon">✨</span>
+            <span class="hub-row-copy"><strong>自定义关</strong><small>只玩你的卡牌</small></span>
           </button>
         </div>
-      </section>
+      </div>
 
-      <div class="hub-settings glass">
-        <label class="toggle-row"><input type="checkbox" id="toggle-voice" checked><span>🔊 语音倒计时</span></label>
+      <div class="surface hub-settings">
+        <label class="toggle-row"><input type="checkbox" id="toggle-voice" checked><span>语音倒计时</span></label>
         <label class="toggle-row"><input type="checkbox" id="toggle-custom" checked><span>混合自定义卡牌</span></label>
       </div>
 
-      <div class="hub-tools">
+      <footer class="hub-footer">
         <button id="btn-continue" class="btn-secondary-full hidden">继续闯关进度</button>
-        <button id="btn-achievements" class="tool-btn">🏅 成就</button>
-        <button id="btn-editor" class="tool-btn">✏️ 卡牌编辑</button>
-        <button id="btn-hub-back" class="tool-btn">⚙️ 换名字</button>
-      </div>
+        <div class="hub-footer-links">
+          <button id="btn-achievements" class="link-btn">成就</button>
+          <button id="btn-editor" class="link-btn">卡牌编辑</button>
+          <button id="btn-hub-back" class="link-btn">换名字</button>
+        </div>
+      </footer>
     </section>
 
     <!-- 联机同房 -->
