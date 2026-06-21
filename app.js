@@ -9,6 +9,8 @@ const state = {
   dailyMod: null, activeEvent: null, scoreMult: 1, lustMult: 1, noSkip: false,
   forceMode: null, pendingPkJudge: false, eventsTriggered: 0, usedShield: false,
   recentCardTexts: [], recentScenarioTexts: [],
+  sceneId: null, selectedSceneId: null, storyStages: [], storyData: null,
+  stageIndex: 0, stageRoundIndex: 0,
 };
 
 const SAVE_KEY = "miyu-run-v2";
@@ -17,7 +19,8 @@ const $$ = (s) => document.querySelectorAll(s);
 
 const screens = {
   welcome: $("#screen-welcome"), hub: $("#screen-hub"), sync: $("#screen-sync"),
-  challengePick: $("#screen-challenge-pick"), freePick: $("#screen-free-pick"),
+  challengePick: $("#screen-challenge-pick"), scenePick: $("#screen-scene-pick"),
+  freePick: $("#screen-free-pick"),
   chapter: $("#screen-chapter"), game: $("#screen-game"), chapterClear: $("#screen-chapter-clear"),
   end: $("#screen-end"), achievements: $("#screen-achievements"), editor: $("#screen-editor"),
 };
@@ -40,7 +43,12 @@ function isPk() { return state.playStyle === "pk"; }
 function isDaily() { return state.playStyle === "daily"; }
 function isChallenge() { return state.playStyle === "challenge"; }
 function isCustom() { return state.playStyle === "custom"; }
-function isStructured() { return isCampaign() || isPk() || isDaily() || isChallenge(); }
+function isStory() { return state.playStyle === "story"; }
+function isStructured() { return isCampaign() || isPk() || isDaily() || isChallenge() || isStory(); }
+
+function getCurrentStoryStage() {
+  return state.storyStages?.[state.stageIndex];
+}
 
 function isSecretUnlocked() {
   return profile.level >= SECRET_CHAPTER_UNLOCK.minLevel &&
@@ -282,7 +290,7 @@ function clearSave() { localStorage.removeItem(SAVE_KEY); }
 
 function updateCampaignHUD() {
   const hud = $("#campaign-hud");
-  const show = isCampaign() || isPk() || isDaily() || isChallenge();
+  const show = isCampaign() || isPk() || isDaily() || isChallenge() || isStory();
   hud.classList.toggle("hidden", !show);
   if (!show) return;
   $("#lust-name-a").textContent = state.nameA;
@@ -312,6 +320,13 @@ function updateHUD() {
     const r = state.challengeRounds?.[state.challengeRound];
     $("#mode-badge").textContent = `${p?.icon || "🎯"} ${r?.tag || p?.label || "挑战"}`;
     $("#card-counter").textContent = `${p?.label || "挑战"} · ${state.challengeRound + 1}/${state.challengeMax}`;
+    $("#btn-settings").style.visibility = "hidden";
+  } else if (isStory()) {
+    const scene = state.storyData;
+    const st = getCurrentStoryStage();
+    const r = getCampaignRound();
+    $("#mode-badge").textContent = `${scene?.icon || "📖"} ${r?.tag || st?.stageName || "剧情"}`;
+    $("#card-counter").textContent = `${scene?.name || "场景"} · 第${state.stageIndex + 1}幕 ${state.stageRoundIndex + 1}/${st?.rounds?.length || "?"}`;
     $("#btn-settings").style.visibility = "hidden";
   } else {
     $("#mode-badge").textContent = `${GAME_MODES[state.mode].icon} ${GAME_MODES[state.mode].label}`;
@@ -349,6 +364,10 @@ function getCampaignRound() {
   if (isChallenge()) {
     return state.challengeRounds?.[state.challengeRound] || { mode: "cards", tag: "挑战", brief: "完成本关。" };
   }
+  if (isStory()) {
+    const st = getCurrentStoryStage();
+    return st?.rounds?.[state.stageRoundIndex] || { mode: "scenario", tag: "剧情", brief: "跟随故事。" };
+  }
   if (isPk()) return { mode: pick(["cards", "dice", "mystery", "wheel"]), tag: "PK" };
   return getChapter().rounds[state.roundInChapter];
 }
@@ -374,7 +393,7 @@ function drawCampaignCard() {
     const boss = getChapterBoss();
     return { kind: "boss", type: "sync", text: boss.text, title: boss.title };
   }
-  if (isChallenge() || isDaily()) {
+  if (isChallenge() || isDaily() || isStory()) {
     const round = getCampaignRound();
     if (round?.text && round.mode !== "scenario") {
       return { kind: round.kind || "normal", type: round.type || "sync", text: round.text };
@@ -404,6 +423,13 @@ function drawCampaignCard() {
 function buildScenarioDeck() {
   const intensity = getIntensity();
   const entries = [];
+  const sceneId = state.selectedSceneId;
+  if (sceneId && SCENE_CATALOG?.[sceneId]) {
+    SCENE_CATALOG[sceneId].stages.forEach((st) => {
+      st.rounds.forEach((r) => entries.push({ kind: r.kind, type: "sync", text: r.text }));
+    });
+    return shuffle(entries);
+  }
   const pack = SCENARIO_PACKS?.[intensity] || SCENARIO_PACKS.hot;
   Object.entries(pack).forEach(([kind, lines]) => {
     lines.forEach((text) => entries.push({ kind, type: "sync", text }));
@@ -488,7 +514,7 @@ function flipCard() {
   if (state.currentCard.kind === "timer") startTimer(state.currentCard.seconds);
   else if (state.activeEvent?.id === "timer_challenge") startTimer(60);
   else {
-    const round = (isChallenge() || isDaily()) ? getCampaignRound() : null;
+    const round = (isChallenge() || isDaily() || isStory()) ? getCampaignRound() : null;
     const roundTimer = round?.timer;
     const modTimer = state.dailyMod?.timer;
     const presetTimer = isChallenge() && CHALLENGE_PRESETS[state.challengeId]?.timer;
@@ -594,7 +620,7 @@ function pickMystery(idx) {
 
 function maybeTriggerEvent() {
   const rate = getDiff().eventRate;
-  if (Math.random() > rate || isCustom() || isChallenge()) return false;
+  if (Math.random() > rate || isCustom() || isChallenge() || isStory()) return false;
   const ev = pick(RANDOM_EVENTS);
   state.activeEvent = ev; state.eventsTriggered++;
   profile.stats.events = (profile.stats.events || 0) + 1;
@@ -694,6 +720,7 @@ function completeRound() {
   if (isCampaign()) { if (state.isBossRound) unlockAchievement("boss_kill"); advanceCampaign(true); return; }
   if (isDaily()) { advanceDaily(true); return; }
   if (isChallenge()) { advanceChallenge(true); return; }
+  if (isStory()) { advanceStoryRound(true); return; }
   state.currentPlayer = 1 - state.currentPlayer;
 }
 
@@ -707,6 +734,7 @@ function skipRound() {
   if (isCampaign()) { advanceCampaign(false); return; }
   if (isDaily()) { advanceDaily(false); return; }
   if (isChallenge()) { advanceChallenge(false); return; }
+  if (isStory()) { advanceStoryRound(false); return; }
   state.currentPlayer = 1 - state.currentPlayer; updateHUD();
 }
 
@@ -804,6 +832,7 @@ function showVictory() {
 
 function showChapterIntro() {
   const ch = getChapter();
+  $("#chapter-label").textContent = "章节开始";
   $("#chapter-icon").textContent = ch.icon;
   $("#chapter-title").textContent = ch.title;
   $("#chapter-desc").textContent = ch.desc + (ch.secret ? "（隐藏章节）" : "");
@@ -811,6 +840,139 @@ function showChapterIntro() {
   $("#chapter-intensity").textContent = INTENSITY_LABELS[ch.intensity];
   if (ch.secret) unlockAchievement("secret_ch");
   showScreen("chapter");
+}
+
+function showSceneStageIntro() {
+  const scene = state.storyData;
+  const st = getCurrentStoryStage();
+  if (!scene || !st) return;
+  state.intensity = st.intensity;
+  $("#chapter-label").textContent = `第 ${state.stageIndex + 1} 幕 / 共 ${state.storyStages.length} 幕`;
+  $("#chapter-icon").textContent = scene.icon;
+  $("#chapter-title").textContent = `${scene.name} · ${st.stageName}`;
+  $("#chapter-desc").textContent = interpolate(st.intro);
+  $("#chapter-rounds").textContent = `${st.rounds.length} 段剧情`;
+  $("#chapter-intensity").textContent = INTENSITY_LABELS[st.intensity];
+  showScreen("chapter");
+  showToast(scene.tagline, 3500);
+}
+
+function advanceStoryRound(completed) {
+  state.stageRoundIndex++;
+  const st = getCurrentStoryStage();
+  if (state.stageRoundIndex >= st.rounds.length) {
+    finishStoryStage();
+    return;
+  }
+  state.currentPlayer = 1 - state.currentPlayer;
+  setTimeout(startRound, completed ? 400 : 250);
+}
+
+function finishStoryStage() {
+  const st = getCurrentStoryStage();
+  const stars = state.chapterSkips === 0 ? 3 : state.chapterSkips <= 1 ? 2 : 1;
+  addXP(40 + stars * 15);
+  $("#clear-stars").textContent = "⭐".repeat(stars) + "☆".repeat(3 - stars);
+  $("#clear-title").textContent = `${st.stageName} 完成`;
+  $("#clear-stats").textContent = `${state.storyData.name} · 第 ${state.stageIndex + 1} 幕`;
+  $("#clear-msg").textContent = state.stageIndex >= state.storyStages.length - 1
+    ? "故事即将落幕……" : `下一幕：${state.storyStages[state.stageIndex + 1]?.stageName || ""}`;
+  $("#btn-next-chapter").textContent = state.stageIndex >= state.storyStages.length - 1 ? "故事结局" : "下一幕";
+  state.chapterSkips = 0;
+  showScreen("chapterClear");
+}
+
+function finishStory() {
+  profile.gamesPlayed++;
+  addXP(180);
+  const scene = state.storyData;
+  $("#end-emoji").textContent = scene?.icon || "📖";
+  $("#end-title").textContent = `${scene?.name || "场景"} · 剧终`;
+  $("#end-rank").textContent = scene?.tagline || "";
+  $("#end-stats").textContent = `完成 ${state.completed} 段 · 跳过 ${state.skipped} 段`;
+  $("#end-message").textContent = scene?.desc || "这一段故事，属于你们。";
+  $("#end-xp").textContent = "+180 XP";
+  profile.lastSceneId = state.sceneId;
+  saveProfile();
+  showScreen("end");
+}
+
+function startStory(sceneId) {
+  const built = buildStoryRounds(sceneId);
+  if (!built.scene) { showToast("场景不存在"); return; }
+  state.playStyle = "story";
+  state.sceneId = sceneId;
+  state.storyData = built.scene;
+  state.storyStages = built.stages;
+  state.stageIndex = 0;
+  state.stageRoundIndex = 0;
+  state.chapterSkips = 0;
+  state.completed = 0;
+  state.skipped = 0;
+  state.streak = 0;
+  state.lustA = 0;
+  state.lustB = 0;
+  state.currentPlayer = Math.random() < 0.5 ? 0 : 1;
+  state.noSkip = false;
+  resetRun();
+  profile.lastSceneId = sceneId;
+  saveProfile();
+  showSceneStageIntro();
+}
+
+function advanceStoryStage() {
+  state.stageIndex++;
+  state.stageRoundIndex = 0;
+  if (state.stageIndex >= state.storyStages.length) {
+    finishStory();
+    return;
+  }
+  showSceneStageIntro();
+}
+
+function getScenePeakIntensity(scene) {
+  const order = { warm: 0, hot: 1, deep: 2 };
+  let peak = "warm";
+  scene.stages?.forEach((st) => {
+    if ((order[st.intensity] ?? 0) > (order[peak] ?? 0)) peak = st.intensity;
+  });
+  return peak;
+}
+
+function renderSceneList() {
+  const filter = document.querySelector('input[name="scene-filter"]:checked')?.value || "all";
+  const list = getSceneList().filter((s) => filter === "all" || getScenePeakIntensity(s) === filter);
+  $("#scene-list").innerHTML = list.map((s) => {
+    const acts = s.stages?.length || 4;
+    const last = profile.lastSceneId === s.id ? '<span class="scene-last">上次玩过</span>' : "";
+    return `<button class="scene-card" data-id="${s.id}" style="--scene-accent:${s.color || "#d4567a"}">
+      <span class="scene-icon">${s.icon}</span>
+      <div class="scene-body">
+        <strong>${s.name}</strong>
+        <em>${s.tagline}</em>
+        <p>${s.desc}</p>
+        <span class="scene-meta">${acts} 幕 · ${INTENSITY_LABELS[getScenePeakIntensity(s)]}</span>
+        ${last}
+      </div>
+    </button>`;
+  }).join("");
+  $$(".scene-card").forEach((b) => b.addEventListener("click", () => startStory(b.dataset.id)));
+}
+
+function populateSceneSelect() {
+  const sel = $("#free-scene-select");
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">🎲 随机混合（全库情境）</option>'
+    + getSceneList().map((s) => `<option value="${s.id}">${s.icon} ${s.name} — ${s.tagline}</option>`).join("");
+  if (cur) sel.value = cur;
+  else if (profile.lastSceneId) sel.value = profile.lastSceneId;
+}
+
+function updateFreeSceneField() {
+  const isSc = document.querySelector('input[name="mode"]:checked')?.value === "scenario";
+  $("#scene-pick-field")?.classList.toggle("hidden", !isSc);
+  if (isSc) populateSceneSelect();
 }
 
 function getPlayMode() {
@@ -822,7 +984,7 @@ function getPlayMode() {
 
 function startRound() {
   if (RoomSync.isGuest()) return;
-  if (!maybeTriggerEvent() && (isChallenge() || isDaily())) showChallengeBrief();
+  if (!maybeTriggerEvent() && (isChallenge() || isDaily() || isStory())) showChallengeBrief();
   const mode = getPlayMode();
   state.mode = mode;
   if (mode === "scenario") {
@@ -905,8 +1067,11 @@ function startChallenge(id) {
 
 function startFreeGame() {
   state.playStyle = "free";
+  state.sceneId = null;
   state.intensity = document.querySelector('input[name="intensity"]:checked').value;
   state.mode = document.querySelector('input[name="mode"]:checked').value;
+  state.selectedSceneId = state.mode === "scenario" ? ($("#free-scene-select")?.value || "") : "";
+  if (state.selectedSceneId) profile.lastSceneId = state.selectedSceneId;
   if (state.mode === "cards") state.deck = buildDeck();
   else if (state.mode === "scenario") state.deck = buildScenarioDeck();
   else state.deck = [];
@@ -981,7 +1146,8 @@ $$(".hub-card").forEach((b) => b.addEventListener("click", () => {
   else if (m === "pk") startPk();
   else if (m === "daily") startDaily();
   else if (m === "challenge") { renderChallengeList(); showScreen("challengePick"); }
-  else if (m === "free") showScreen("freePick");
+  else if (m === "story") { renderSceneList(); showScreen("scenePick"); }
+  else if (m === "free") { populateSceneSelect(); updateFreeSceneField(); showScreen("freePick"); }
   else if (m === "custom") startCustomGame();
 }));
 
@@ -1023,6 +1189,7 @@ $$(".sync-mode-btn").forEach((b) => b.addEventListener("click", () => {
   else if (m === "campaign") startCampaign(true);
   else if (m === "pk") startPk();
   else if (m === "daily") startDaily();
+  else if (m === "story") { renderSceneList(); showScreen("scenePick"); }
 }));
 
 $("#btn-sync-back").addEventListener("click", () => {
@@ -1056,11 +1223,15 @@ $("#btn-chapter-start").addEventListener("click", () => {
 });
 $("#btn-next-chapter").addEventListener("click", () => {
   if (RoomSync.isGuest()) { RoomSync.sendAction("next_chapter"); return; }
+  if (isStory()) { advanceStoryStage(); return; }
   if (state.chapterIndex >= getMaxChapterIndex()) showVictory();
   else { state.chapterIndex++; saveGame(); showChapterIntro(); }
 });
 $("#btn-clear-menu").addEventListener("click", () => { saveGame(); showScreen("hub"); renderHub(); });
 $("#btn-challenge-back").addEventListener("click", () => showScreen("hub"));
+$("#btn-scene-back").addEventListener("click", () => showScreen("hub"));
+$$('input[name="scene-filter"]').forEach((r) => r.addEventListener("change", renderSceneList));
+$$('input[name="mode"]').forEach((r) => r.addEventListener("change", updateFreeSceneField));
 $("#btn-free-start").addEventListener("click", () => startFreeGame());
 $("#btn-free-back").addEventListener("click", () => showScreen("hub"));
 $("#btn-hub-back").addEventListener("click", () => showScreen("welcome"));

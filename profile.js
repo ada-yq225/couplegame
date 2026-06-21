@@ -15,6 +15,7 @@ const defaultProfile = () => ({
   useCustomCards: true,
   voiceEnabled: true,
   campaignClearsForSecret: 0,
+  lastSceneId: "",
   dailyLast: "",
   dailyDone: false,
   stats: { completed: 0, skipped: 0, bosses: 0, itemsUsed: 0 },
@@ -164,9 +165,21 @@ function pickCardText(intensity, type) {
   return text;
 }
 
+function getSceneScenarioPool(kind, sceneId) {
+  if (!sceneId || typeof SCENE_CATALOG === "undefined") return [];
+  const scene = SCENE_CATALOG[sceneId];
+  if (!scene) return [];
+  const pool = [];
+  scene.stages.forEach((st) => st.rounds.forEach((r) => { if (r.kind === kind) pool.push(r.text); }));
+  return pool;
+}
+
 function pickScenario(kind) {
-  const pack = SCENARIO_PACKS?.[state?.forceIntensity || state?.intensity || "hot"]?.[kind]
+  const sceneId = state?.sceneId || state?.selectedSceneId;
+  const scenePool = getSceneScenarioPool(kind, sceneId);
+  const base = SCENARIO_PACKS?.[state?.forceIntensity || state?.intensity || "hot"]?.[kind]
     || SCENARIO_PACKS?.hot?.[kind] || [];
+  const pack = scenePool.length && sceneId ? scenePool : base;
   if (!pack.length) return "自由发挥，按你们的心情来。";
   const recent = state?.recentScenarioTexts || [];
   const fresh = pack.filter((t) => !recent.includes(t));

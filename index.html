@@ -69,6 +69,9 @@
         <button class="hub-card" data-mode="challenge">
           <em>🎯</em><strong>挑战模式</strong><small>10 种专题 · 每关独立文案</small>
         </button>
+        <button class="hub-card featured" data-mode="story">
+          <em>📖</em><strong>场景故事</strong><small>10 种剧情 · 四幕循序渐进</small>
+        </button>
         <button class="hub-card" data-mode="free">
           <em>🃏</em><strong>自由模式</strong><small>卡牌/骰子/轮盘/盲选/情境</small>
         </button>
@@ -108,6 +111,7 @@
                 <button class="sync-mode-btn" data-sync="free">🃏 自由</button>
                 <button class="sync-mode-btn" data-sync="pk">⚔️ PK</button>
                 <button class="sync-mode-btn" data-sync="daily">📅 每日</button>
+                <button class="sync-mode-btn" data-sync="story">📖 场景</button>
               </div>
             </div>
           </div>
@@ -119,6 +123,22 @@
         </div>
         <p id="sync-err" class="sync-err"></p>
         <button id="btn-sync-back" class="btn-ghost">返回大厅</button>
+      </div>
+    </section>
+
+    <!-- 场景选择 -->
+    <section id="screen-scene-pick" class="screen">
+      <div class="pick-card glass">
+        <h2>选择场景</h2>
+        <p class="pick-sub">每段故事分 4 幕，从暧昧到深入。选好后按剧情演绎即可。</p>
+        <div class="scene-filter-row">
+          <label class="scene-filter"><input type="radio" name="scene-filter" value="all" checked><span>全部</span></label>
+          <label class="scene-filter"><input type="radio" name="scene-filter" value="warm"><span>🫦 偏前戏</span></label>
+          <label class="scene-filter"><input type="radio" name="scene-filter" value="hot"><span>🔥 偏火热</span></label>
+          <label class="scene-filter"><input type="radio" name="scene-filter" value="deep"><span>💦 偏深入</span></label>
+        </div>
+        <div id="scene-list" class="scene-list"></div>
+        <button id="btn-scene-back" class="btn-ghost">返回大厅</button>
       </div>
     </section>
 
@@ -152,6 +172,13 @@
             <label class="intensity-option"><input type="radio" name="intensity" value="deep"><span class="option-card"><em>💦</em><strong>深入</strong></span></label>
           </div>
         </fieldset>
+        <fieldset id="scene-pick-field" class="scene-pick-field hidden">
+          <p class="scene-pick-label">情境场景（可选）</p>
+          <select id="free-scene-select" class="scene-select">
+            <option value="">🎲 随机混合（全库情境）</option>
+          </select>
+          <p class="scene-pick-hint">选定场景后，情境牌只从该剧情抽取</p>
+        </fieldset>
         <button id="btn-free-start" class="btn-primary">开始</button>
         <button id="btn-free-back" class="btn-ghost">返回</button>
       </div>
@@ -161,7 +188,7 @@
     <section id="screen-chapter" class="screen">
       <div class="chapter-card glass">
         <p id="chapter-icon" class="chapter-icon">🌙</p>
-        <p class="chapter-label">章节开始</p>
+        <p class="chapter-label" id="chapter-label">章节开始</p>
         <h2 id="chapter-title">第一夜</h2>
         <p id="chapter-desc" class="chapter-desc"></p>
         <div class="chapter-meta">
@@ -357,6 +384,7 @@
   <script src="data.js"></script>
   <script src="content-extra.js"></script>
   <script src="challenges.js"></script>
+  <script src="scenes.js"></script>
   <script src="profile.js"></script>
   <script src="voice.js"></script>
   <script src="sync.js"></script>

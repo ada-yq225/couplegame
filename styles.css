@@ -990,6 +990,30 @@ body.in-game .app {
 .pick-card h2 { font-family: var(--font-serif); margin-bottom: 16px; }
 .pick-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
 .pick-sub { font-size: 0.78rem; color: var(--text-muted); margin: -8px 0 14px; line-height: 1.5; }
+
+.scene-filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.scene-filter { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--text-muted); cursor: pointer; padding: 6px 10px; border-radius: 20px; border: 1px solid var(--glass-border); }
+.scene-filter:has(input:checked) { border-color: var(--scene-accent, var(--rose)); color: var(--text); background: rgba(212,86,122,0.1); }
+.scene-filter input { accent-color: var(--rose-hot); }
+
+.scene-list { display: flex; flex-direction: column; gap: 10px; max-height: 55vh; overflow-y: auto; margin-bottom: 14px; padding-right: 4px; }
+.scene-card {
+  display: flex; gap: 14px; padding: 14px; text-align: left; width: 100%;
+  border: 1px solid var(--glass-border); border-left: 3px solid var(--scene-accent, var(--rose));
+  border-radius: 14px; background: rgba(0,0,0,0.22); cursor: pointer; font-family: inherit; color: var(--text);
+}
+.scene-card:active { background: rgba(212,86,122,0.12); }
+.scene-icon { font-size: 2rem; flex-shrink: 0; line-height: 1; }
+.scene-body strong { display: block; font-size: 0.95rem; margin-bottom: 2px; }
+.scene-body em { display: block; font-style: normal; font-size: 0.72rem; color: var(--scene-accent, var(--rose-soft)); margin-bottom: 6px; }
+.scene-body p { font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; margin: 0 0 8px; }
+.scene-meta { font-size: 0.68rem; color: var(--text-muted); }
+.scene-last { display: inline-block; margin-left: 8px; font-size: 0.65rem; color: var(--gold); }
+
+.scene-pick-field { border: none; margin: 12px 0 16px; padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); }
+.scene-pick-label { font-size: 0.82rem; margin: 0 0 8px; color: var(--text); }
+.scene-select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.35); color: var(--text); font-family: inherit; font-size: 0.85rem; }
+.scene-pick-hint { font-size: 0.68rem; color: var(--text-muted); margin: 8px 0 0; }
 .pick-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px; border: 1px solid var(--glass-border); border-radius: 14px; background: rgba(0,0,0,0.2); cursor: pointer; font-family: inherit; color: var(--text); text-align: left; }
 .pick-item em { font-style: normal; font-size: 1.4rem; }
 .pick-item strong { display: block; font-size: 0.9rem; }
