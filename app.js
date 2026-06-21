@@ -11,7 +11,7 @@ const state = {
   recentCardTexts: [], recentScenarioTexts: [],
   sceneId: null, selectedSceneId: null, storyStages: [], storyData: null,
   stageIndex: 0, stageRoundIndex: 0,
-  eroticaId: null, eroticaData: null, eroticaSectionIndex: 0, eroticaPlayVariant: 0,
+  eroticaId: null, eroticaData: null, eroticaSectionIndex: 0, eroticaPlayVariant: 0, midnightRush: false,
 };
 
 const SAVE_KEY = "miyu-run-v2";
@@ -600,8 +600,9 @@ function resolveWheel(seg) {
   else if (seg.type === "fantasy") {
     const self = getPlayerName(state.currentPlayer);
     const other = getPlayerName(1 - state.currentPlayer);
+    const ultra = profile.difficulty === "wild" || getIntensity() === "deep";
     const line = typeof drawFantasyCard === "function"
-      ? drawFantasyCard(getIntensity(), self, other, state.nameA, state.nameB)
+      ? drawFantasyCard(getIntensity(), self, other, state.nameA, state.nameB, { ultra })
       : interpolate(pick(BONUS_CARDS));
     $("#wheel-result").textContent = line;
   }
@@ -1008,7 +1009,7 @@ function renderEroticaSection() {
     : "";
   const playHtml = playLine
     ? `<div class="erotica-action" id="erotica-play-box">
-        <span class="erotica-action-label">▶ 此刻就做 · 轮到 ${self}</span>
+        <span class="erotica-action-label">▶ 现在就干 · ${self} 主动</span>
         <p id="erotica-play-text">${playLine}</p>
       </div>`
     : "";
@@ -1036,16 +1037,18 @@ function drawEroticaFantasyCard() {
   const other = getPlayerName(1 - state.currentPlayer);
   const total = story.sections.length;
   const idx = state.eroticaSectionIndex;
-  const intensity = typeof getEroticaIntensityForSection === "function"
+  let intensity = typeof getEroticaIntensityForSection === "function"
     ? getEroticaIntensityForSection(idx, total) : "hot";
+  if (state.midnightRush || profile.difficulty === "wild") intensity = "deep";
+  const ultra = state.midnightRush || profile.difficulty === "wild" || Math.random() < 0.4;
   const line = typeof drawFantasyCard === "function"
-    ? drawFantasyCard(intensity, self, other, state.nameA, state.nameB)
+    ? drawFantasyCard(intensity, self, other, state.nameA, state.nameB, { ultra })
     : interpolate(pick(CARDS[intensity]?.serve || CARDS.hot.serve));
   const box = $("#erotica-play-box");
   const textEl = $("#erotica-play-text");
   const label = box?.querySelector(".erotica-action-label");
   if (textEl) textEl.textContent = line;
-  if (label) label.textContent = `🃏 色牌加码 · ${INTENSITY_LABELS[intensity] || "火热"} · ${self}`;
+  if (label) label.textContent = ultra ? `🔥 极限色牌 · ${self}` : `🃏 色牌加码 · ${INTENSITY_LABELS[intensity] || "火热"} · ${self}`;
   if (box) box.scrollIntoView({ behavior: "smooth", block: "nearest" });
   addHeat(8);
   addLust(state.currentPlayer, 12);
@@ -1065,13 +1068,14 @@ function startMidnightRush() {
   if (!list.length) { showToast("暂无故事"); return; }
   const story = pick(list);
   state.intensity = "deep";
-  startErotica(story.id);
-  showToast(`深夜快闪 · ${story.name} · 深度色牌已就绪`, 3200);
+  startErotica(story.id, { midnight: true });
+  showToast(`深夜快闪 · ${story.name} · 极限色牌已就绪`, 3200);
 }
 
-function startErotica(id) {
+function startErotica(id, opts) {
   const story = getErotica(id);
   if (!story?.sections?.length) { showToast("故事不存在"); return; }
+  state.midnightRush = !!opts?.midnight;
   state.playStyle = "erotica";
   state.eroticaId = id;
   state.eroticaData = story;
@@ -1103,6 +1107,7 @@ function advanceEroticaSection() {
 }
 
 function finishErotica() {
+  state.midnightRush = false;
   profile.gamesPlayed++;
   addXP(200);
   const story = state.eroticaData;
