@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="蜜语">
-  <meta name="theme-color" content="#08060d">
+  <meta name="theme-color" content="#140810">
   <title>蜜语 · 情侣游戏</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -18,8 +18,10 @@
 </head>
 <body>
   <div class="ambient" aria-hidden="true">
+    <div class="ambient-vignette"></div>
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
   </div>
 
   <main class="app">
@@ -27,9 +29,9 @@
     <section id="screen-welcome" class="screen active">
       <header class="hero">
         <div class="brand-mark" aria-hidden="true">♥</div>
-        <p class="eyebrow">成年情侣 · 私密游戏</p>
+        <p class="eyebrow">仅限成年 · 关上门</p>
         <h1>蜜语</h1>
-        <p class="subtitle">情欲闯关 · 边读边做 · 联机同房</p>
+        <p class="subtitle">读一段，做一段。今夜只属于你们两个人。</p>
       </header>
       <form id="setup-form" class="setup-card glass">
         <div class="field-row">
@@ -38,7 +40,7 @@
           <label><span>你</span><input type="text" id="name-b" placeholder="名字" maxlength="12" required autocomplete="off"></label>
         </div>
         <label class="consent-check"><input type="checkbox" id="consent" required><span>双方成年、自愿，随时可停</span></label>
-        <button type="submit" class="btn-primary">进入游戏大厅</button>
+        <button type="submit" class="btn-primary">开门进屋</button>
         <button type="button" id="btn-install-help" class="btn-link">📱 手机上玩</button>
       </form>
     </section>
@@ -63,16 +65,16 @@
         <button class="hub-card hub-hero" data-mode="erotica">
           <span class="hub-icon">🔞</span>
           <span class="hub-hero-copy">
-            <span class="hub-hero-tag">推荐</span>
+            <span class="hub-hero-tag">最色</span>
             <strong>情欲沉浸</strong>
-            <small>34 篇小说 · 边读边做 · 配套色牌</small>
+            <small>34 篇黄文 · 边读边湿 · 配套色牌直接开干</small>
           </span>
         </button>
         <button class="hub-card hub-hero hub-hero-muted" data-mode="midnight">
           <span class="hub-icon">🌙</span>
           <span class="hub-hero-copy">
             <strong>深夜快闪</strong>
-            <small>随机故事 + 极限色牌</small>
+            <small>随机黄文 + 极限色牌 · 抽到就必须做</small>
           </span>
         </button>
       </div>
@@ -181,8 +183,8 @@
     <section id="screen-erotica-pick" class="screen">
       <div class="pick-card glass">
         <h2>情欲沉浸</h2>
-        <p class="pick-sub">选场景，读一段，做一段。每幕配有「此刻就做」指令，可换句、可抽色牌，不尴尬直接开干。</p>
-        <button type="button" id="btn-erotica-random" class="btn-secondary-full">🎲 随机抽一篇</button>
+        <p class="pick-sub sensual-copy">挑一个让你腿软的地方。读着读着就湿了，指令出来就照做——不许装矜持。</p>
+        <button type="button" id="btn-erotica-random" class="btn-secondary-full">🎲 随便来一篇最黄的</button>
         <p class="scene-filter-label">地点</p>
         <div class="scene-filter-row scene-cat-row">
           <label class="scene-filter"><input type="radio" name="erotica-cat-filter" value="all" checked><span>全部</span></label>
@@ -217,7 +219,7 @@
             <button type="button" id="btn-erotica-refresh-play" class="btn-ghost-sm">🔄 换一句</button>
             <button type="button" id="btn-erotica-fantasy-card" class="btn-ghost-sm">🔥 极限色牌</button>
           </div>
-          <button id="btn-erotica-done" class="btn-primary">做完了 · 下一幕 →</button>
+          <button id="btn-erotica-done" class="btn-primary">爽完了 · 下一幕 →</button>
           <button id="btn-erotica-quit" class="btn-ghost">退出故事</button>
         </footer>
       </div>

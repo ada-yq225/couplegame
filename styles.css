@@ -1,21 +1,25 @@
 :root {
-  --bg-deep: #09080c;
-  --bg-elevated: #131118;
-  --surface: rgba(20, 17, 26, 0.92);
-  --surface-hover: rgba(28, 24, 36, 0.96);
+  --bg-deep: #0e060a;
+  --bg-elevated: #1a0c12;
+  --surface: rgba(28, 12, 20, 0.94);
+  --surface-hover: rgba(40, 16, 28, 0.97);
   --bg-card: var(--surface);
   --bg-card-hover: var(--surface-hover);
-  --rose: #f0c4d4;
-  --rose-soft: #e8a8be;
-  --rose-hot: #e8557f;
-  --rose-deep: #a83258;
-  --rose-muted: rgba(232, 85, 127, 0.14);
-  --gold: #d9bc82;
-  --text: #f8f4f7;
-  --text-muted: #9a919f;
-  --text-dim: #6b6470;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-subtle: rgba(255, 255, 255, 0.05);
+  --rose: #ffc8d8;
+  --rose-soft: #f0a0b8;
+  --rose-hot: #ff4d7d;
+  --rose-deep: #b81848;
+  --rose-wine: #6e1434;
+  --rose-muted: rgba(255, 77, 125, 0.16);
+  --rose-glow: rgba(255, 77, 125, 0.38);
+  --blush: #ff8aa8;
+  --skin-warm: #e8b8a8;
+  --gold: #e8c090;
+  --text: #fff5f8;
+  --text-muted: #c4a8b4;
+  --text-dim: #8a6e7a;
+  --border: rgba(255, 140, 170, 0.12);
+  --border-subtle: rgba(255, 120, 160, 0.06);
   --glass-border: var(--border);
   --glass-highlight: rgba(255, 255, 255, 0.03);
   --radius-xs: 10px;
@@ -30,9 +34,10 @@
   --space-6: 24px;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.24), 0 8px 24px rgba(0, 0, 0, 0.18);
   --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.28);
-  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.32);
-  --rose-glow: rgba(232, 85, 127, 0.28);
+  --shadow-lg: 0 16px 48px rgba(80, 8, 32, 0.45);
+  --shadow-rose: 0 8px 32px rgba(255, 77, 125, 0.28);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-sensual: cubic-bezier(0.4, 0, 0.2, 1);
   --font-serif: "Noto Serif SC", serif;
   --font-sans: "Outfit", system-ui, sans-serif;
   --safe-top: env(safe-area-inset-top, 0px);
@@ -50,7 +55,10 @@ html, body {
 
 body {
   font-family: var(--font-sans);
-  background: var(--bg-deep);
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -8%, rgba(120, 24, 56, 0.32), transparent 58%),
+    radial-gradient(ellipse 70% 45% at 100% 88%, rgba(80, 16, 48, 0.22), transparent 50%),
+    var(--bg-deep);
   color: var(--text);
   line-height: 1.55;
   font-size: 15px;
@@ -69,20 +77,32 @@ body.in-game { overflow: hidden; }
   overflow: hidden;
 }
 
+.ambient-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 85% 75% at 50% 45%, transparent 35%, rgba(8, 2, 6, 0.72) 100%);
+}
+
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.42;
-  animation: drift 28s ease-in-out infinite;
+  filter: blur(110px);
+  opacity: 0.5;
+  animation: sensualDrift 24s var(--ease-sensual) infinite;
 }
 
-.orb-1 { width: 280px; height: 280px; background: #5c2440; top: -60px; right: -40px; }
-.orb-2 { width: 240px; height: 240px; background: #241838; bottom: 12%; left: -50px; animation-delay: -12s; }
+.orb-1 { width: 320px; height: 320px; background: #9e1848; top: -80px; right: -60px; }
+.orb-2 { width: 260px; height: 260px; background: #4a1028; bottom: 6%; left: -70px; animation-delay: -10s; }
+.orb-3 { width: 200px; height: 200px; background: #c84868; top: 38%; left: 42%; animation-delay: -16s; opacity: 0.28; }
 
-@keyframes drift {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(16px, -12px); }
+@keyframes sensualDrift {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.45; }
+  50% { transform: translate(20px, -14px) scale(1.08); opacity: 0.58; }
+}
+
+@keyframes breathe {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 77, 125, 0.2); }
+  50% { box-shadow: 0 0 36px rgba(255, 77, 125, 0.42); }
 }
 
 .app {
@@ -132,42 +152,55 @@ body.in-game { overflow: hidden; }
 }
 
 .brand-mark {
-  width: 64px;
-  height: 64px;
+  width: 68px;
+  height: 68px;
   margin: 0 auto var(--space-4);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   color: var(--rose-hot);
-  background: var(--rose-muted);
-  border: 1px solid rgba(232, 85, 127, 0.22);
-  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(255, 77, 125, 0.28), rgba(80, 16, 40, 0.5));
+  border: 1px solid rgba(255, 140, 170, 0.35);
+  border-radius: 20px;
+  animation: breathe 3.5s ease-in-out infinite;
 }
 
 .eyebrow {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 500;
-  letter-spacing: 0.08em;
-  color: var(--text-dim);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--blush);
   margin-bottom: var(--space-2);
 }
 
 .hero h1 {
   font-family: var(--font-serif);
-  font-size: 2.75rem;
+  font-size: 2.85rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  color: var(--text);
+  letter-spacing: 0.08em;
+  background: linear-gradient(160deg, #fff 0%, var(--rose-soft) 45%, var(--rose-hot) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .subtitle {
   color: var(--text-muted);
-  font-size: 0.88rem;
-  margin-top: var(--space-2);
-  max-width: 280px;
+  font-size: 0.9rem;
+  margin-top: var(--space-3);
+  max-width: 300px;
   margin-left: auto;
   margin-right: auto;
+  line-height: 1.65;
+  font-style: italic;
+}
+
+.sensual-copy {
+  color: var(--rose-soft) !important;
+  font-style: italic;
+  line-height: 1.65 !important;
 }
 
 #screen-welcome {
@@ -335,9 +368,9 @@ body.in-game { overflow: hidden; }
 .field-row input::placeholder { color: var(--text-dim); }
 
 .field-row input:focus {
-  border-color: rgba(224, 77, 122, 0.55);
-  background: rgba(0, 0, 0, 0.45);
-  box-shadow: 0 0 0 3px rgba(224, 77, 122, 0.12);
+  border-color: rgba(255, 77, 125, 0.55);
+  background: rgba(40, 8, 24, 0.55);
+  box-shadow: 0 0 0 3px rgba(255, 77, 125, 0.15), 0 0 20px rgba(255, 77, 125, 0.1);
 }
 
 .heart-divider {
@@ -407,17 +440,22 @@ body.in-game { overflow: hidden; }
 .btn-primary {
   width: 100%;
   padding: 15px 24px;
-  background: var(--rose-hot);
+  background: linear-gradient(135deg, var(--rose-hot) 0%, var(--rose-deep) 55%, var(--rose-wine) 100%);
   color: #fff;
   font-size: 0.95rem;
   font-weight: 600;
   min-height: 50px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
+  box-shadow: var(--shadow-rose);
 }
 
-.btn-primary:hover:not(:disabled) { background: #ef6289; }
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ff6288 0%, #c82050 55%, #801838 100%);
+  box-shadow: 0 10px 36px rgba(255, 77, 125, 0.38);
+}
+
 .btn-primary:active:not(:disabled) { transform: scale(0.985); }
-.btn-primary:disabled { opacity: 0.38; cursor: not-allowed; }
+.btn-primary:disabled { opacity: 0.38; cursor: not-allowed; box-shadow: none; }
 
 .btn-secondary {
   flex: 1;
@@ -481,7 +519,8 @@ body.in-game .app {
 .player-name {
   font-family: var(--font-serif);
   font-size: 1.2rem;
-  color: var(--rose);
+  color: var(--blush);
+  text-shadow: 0 0 24px rgba(255, 77, 125, 0.25);
 }
 
 .turn-label {
@@ -516,9 +555,10 @@ body.in-game .app {
 .heat-fill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #9e3058, #e8a0b8, #ffd700);
+  background: linear-gradient(90deg, var(--rose-wine), var(--rose-hot), var(--blush), var(--gold));
   border-radius: 8px;
   transition: width 0.5s ease;
+  box-shadow: 0 0 12px rgba(255, 77, 125, 0.45);
 }
 
 .heat-label {
@@ -621,18 +661,20 @@ body.in-game .app {
 }
 
 .card-back {
-  background: #1a1522;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-md);
+  background: linear-gradient(165deg, #2a1020 0%, #1a0814 100%);
+  border: 1px solid rgba(255, 120, 160, 0.22);
+  box-shadow: var(--shadow-lg), 0 0 40px rgba(255, 77, 125, 0.08);
 }
 
 .card-pattern {
   width: 72px;
   height: 72px;
-  border: 2px solid rgba(232, 160, 184, 0.3);
+  border: 2px solid rgba(255, 120, 160, 0.35);
   border-radius: 50%;
   margin-bottom: 16px;
   position: relative;
+  box-shadow: 0 0 28px rgba(255, 77, 125, 0.2);
+  animation: breathe 4s ease-in-out infinite;
 }
 
 .card-pattern::before {
@@ -663,10 +705,10 @@ body.in-game .app {
 }
 
 .card-front {
-  background: #1e1828;
-  border: 1px solid rgba(217, 188, 130, 0.22);
+  background: linear-gradient(165deg, #321828 0%, #1e0c18 100%);
+  border: 1px solid rgba(255, 140, 170, 0.28);
   transform: rotateY(180deg);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 180, 200, 0.06);
 }
 
 .card-label {
@@ -679,7 +721,8 @@ body.in-game .app {
 .card-text {
   font-family: var(--font-serif);
   font-size: 1.15rem;
-  line-height: 1.65;
+  line-height: 1.7;
+  color: rgba(255, 235, 242, 0.95);
   flex: 1;
   display: flex;
   align-items: center;
@@ -922,12 +965,12 @@ body.in-game .app {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: rgba(212, 86, 122, 0.9);
+  background: linear-gradient(145deg, var(--rose-hot), var(--rose-deep));
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 60px rgba(212, 86, 122, 0.6);
+  box-shadow: 0 0 72px rgba(255, 77, 125, 0.65);
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   pointer-events: none;
 }
@@ -968,7 +1011,7 @@ body.in-game .app {
   margin-bottom: 10px;
 }
 
-.end-stats { color: var(--rose); font-size: 0.9rem; margin-bottom: 28px; }
+.end-stats { color: var(--blush); font-size: 0.9rem; margin-bottom: 28px; }
 
 .end-card .btn-primary { margin-bottom: 10px; }
 .end-card .btn-ghost { width: 100%; padding: 14px; }
@@ -1083,8 +1126,11 @@ body.in-game .app {
   font-family: var(--font-serif);
   font-size: 1.35rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--text);
+  letter-spacing: 0.06em;
+  background: linear-gradient(135deg, var(--text), var(--rose-soft));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   line-height: 1.2;
 }
 
@@ -1131,9 +1177,10 @@ body.in-game .app {
 
 .hub-xp-fill {
   height: 100%;
-  background: var(--rose-hot);
+  background: linear-gradient(90deg, var(--rose-deep), var(--rose-hot), var(--blush));
   border-radius: 99px;
   transition: width 0.45s var(--ease-out);
+  box-shadow: 0 0 10px rgba(255, 77, 125, 0.4);
 }
 
 .hub-xp-text { font-size: 0.68rem; color: var(--text-dim); white-space: nowrap; }
@@ -1149,40 +1196,83 @@ body.in-game .app {
   align-items: center;
   gap: var(--space-4);
   width: 100%;
-  padding: var(--space-4);
-  border: 1px solid rgba(232, 85, 127, 0.28);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid rgba(255, 100, 140, 0.32);
   border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, rgba(232, 85, 127, 0.16), rgba(20, 17, 26, 0.95));
+  background: linear-gradient(135deg, rgba(255, 77, 125, 0.22) 0%, rgba(40, 12, 28, 0.92) 55%, rgba(20, 8, 16, 0.98) 100%);
   text-align: left;
   cursor: pointer;
   font-family: inherit;
   color: var(--text);
-  transition: background 0.15s, transform 0.15s var(--ease-out);
+  transition: background 0.2s, transform 0.15s var(--ease-out), box-shadow 0.2s;
+  box-shadow: 0 4px 24px rgba(255, 77, 125, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+
+.hub-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 100% at 0% 50%, rgba(255, 120, 160, 0.14), transparent 65%);
+  pointer-events: none;
 }
 
 .hub-hero-muted {
-  border-color: var(--border);
-  background: var(--surface);
+  border-color: rgba(255, 100, 140, 0.18);
+  background: linear-gradient(135deg, rgba(60, 16, 36, 0.65), rgba(20, 8, 16, 0.95));
+  box-shadow: none;
 }
 
-.hub-hero:hover { background: var(--surface-hover); }
-.hub-hero:first-child:hover { background: linear-gradient(135deg, rgba(232, 85, 127, 0.22), rgba(28, 24, 36, 0.98)); }
+.hub-hero-muted::before {
+  background: radial-gradient(ellipse 60% 80% at 100% 0%, rgba(255, 77, 125, 0.1), transparent 60%);
+}
+
+.hub-hero:hover {
+  border-color: rgba(255, 120, 160, 0.45);
+  box-shadow: 0 6px 32px rgba(255, 77, 125, 0.2);
+}
+
+.hub-hero:first-child:hover {
+  background: linear-gradient(135deg, rgba(255, 77, 125, 0.3) 0%, rgba(48, 14, 32, 0.94) 55%, rgba(24, 8, 18, 0.98) 100%);
+}
+
 .hub-hero:active { transform: scale(0.99); }
 
-.hub-hero-copy { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.hub-hero-copy strong { font-size: 1rem; font-weight: 600; }
-.hub-hero-copy small { font-size: 0.76rem; color: var(--text-muted); line-height: 1.45; }
+.hub-hero .hub-icon {
+  background: rgba(255, 77, 125, 0.18);
+  border-color: rgba(255, 140, 170, 0.28);
+}
+
+.hub-hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.hub-hero-copy strong { font-size: 1.02rem; font-weight: 600; }
+.hub-hero-copy small { font-size: 0.76rem; line-height: 1.45; }
 
 .hub-hero-tag {
   display: inline-block;
   width: fit-content;
   font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--rose-hot);
-  margin-bottom: 2px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--rose-hot), var(--rose-deep));
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  box-shadow: 0 2px 10px rgba(255, 77, 125, 0.35);
 }
+
+.hub-hero-copy strong { color: #fff5f8; }
+.hub-hero-copy small { color: rgba(255, 200, 216, 0.75); }
 
 .hub-block { display: flex; flex-direction: column; gap: var(--space-2); }
 
@@ -1234,8 +1324,8 @@ body.in-game .app {
   opacity: 0.7;
 }
 
-.hub-row:hover { background: var(--surface-hover); }
-.hub-row:active { background: rgba(255, 255, 255, 0.04); }
+.hub-row:hover { background: rgba(255, 77, 125, 0.06); }
+.hub-row:active { background: rgba(255, 77, 125, 0.1); }
 
 .hub-icon {
   width: 40px;
@@ -1331,10 +1421,13 @@ body.in-game .app {
 .pick-card { margin: auto 0; padding: 26px 22px; text-align: center; }
 .pick-card h2 {
   font-family: var(--font-serif);
-  font-size: 1.3rem;
+  font-size: 1.35rem;
   font-weight: 600;
   margin-bottom: var(--space-3);
-  color: var(--text);
+  background: linear-gradient(135deg, var(--text), var(--rose-soft));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 .pick-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
 .pick-sub { font-size: 0.78rem; color: var(--text-muted); margin: -8px 0 14px; line-height: 1.5; }
@@ -1393,8 +1486,13 @@ body.in-game .app {
   transition: background 0.15s, border-color 0.15s;
 }
 
-.scene-card:hover { background: var(--surface-hover); border-color: rgba(232, 85, 127, 0.22); }
-.scene-card:active { background: rgba(255, 255, 255, 0.04); }
+.scene-card:hover {
+  background: rgba(255, 77, 125, 0.08);
+  border-color: rgba(255, 120, 160, 0.28);
+  box-shadow: 0 4px 20px rgba(255, 77, 125, 0.1);
+}
+
+.scene-card:active { background: rgba(255, 77, 125, 0.14); }
 .scene-icon { font-size: 2rem; flex-shrink: 0; line-height: 1; }
 .scene-body strong { display: block; font-size: 0.95rem; margin-bottom: 2px; }
 .scene-body em { display: block; font-style: normal; font-size: 0.72rem; color: var(--scene-accent, var(--rose-soft)); margin-bottom: 6px; }
@@ -1416,7 +1514,9 @@ body.in-game .app {
   flex-direction: column;
   text-align: left;
   border-radius: 0;
-  background: linear-gradient(180deg, rgba(14, 10, 20, 0.96) 0%, rgba(8, 6, 14, 0.98) 100%);
+  background:
+    radial-gradient(ellipse 100% 40% at 50% 0%, rgba(120, 24, 56, 0.25), transparent 55%),
+    linear-gradient(180deg, #180810 0%, #0c0408 100%);
   border: none;
   box-shadow: none;
 }
@@ -1454,39 +1554,54 @@ body.in-game .app {
 }
 .erotica-narrative {
   font-family: var(--font-serif);
-  font-size: 0.95rem;
-  line-height: 1.85;
-  color: rgba(255, 248, 252, 0.92);
+  font-size: 1rem;
+  line-height: 1.9;
+  color: rgba(255, 235, 242, 0.94);
   margin-bottom: 20px;
+  letter-spacing: 0.02em;
 }
 .erotica-narrative p { margin: 0 0 1em; text-indent: 2em; }
 .erotica-narrative p:first-child { text-indent: 0; }
 .erotica-action {
-  margin: 14px 0;
-  padding: 14px 16px;
-  border-radius: 14px;
-  border: 1px solid rgba(212, 86, 122, 0.45);
-  background: linear-gradient(135deg, rgba(212, 86, 122, 0.18), rgba(201, 168, 108, 0.1));
-  box-shadow: 0 0 24px rgba(212, 86, 122, 0.15), inset 0 1px 0 rgba(255,255,255,0.06);
-  animation: eroticaPulse 2.5s ease-in-out infinite;
+  margin: 16px 0;
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 77, 125, 0.45);
+  background: linear-gradient(135deg, rgba(255, 77, 125, 0.22) 0%, rgba(120, 24, 56, 0.35) 100%);
+  box-shadow: 0 0 32px rgba(255, 77, 125, 0.18), inset 0 1px 0 rgba(255, 180, 200, 0.1);
+  animation: eroticaPulse 2.8s ease-in-out infinite;
 }
+
 @keyframes eroticaPulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(212, 86, 122, 0.12), inset 0 1px 0 rgba(255,255,255,0.06); }
-  50% { box-shadow: 0 0 32px rgba(212, 86, 122, 0.28), inset 0 1px 0 rgba(255,255,255,0.08); }
+  0%, 100% {
+    box-shadow: 0 0 24px rgba(255, 77, 125, 0.14), inset 0 1px 0 rgba(255, 180, 200, 0.08);
+    border-color: rgba(255, 77, 125, 0.38);
+  }
+  50% {
+    box-shadow: 0 0 44px rgba(255, 77, 125, 0.32), inset 0 1px 0 rgba(255, 180, 200, 0.14);
+    border-color: rgba(255, 120, 160, 0.55);
+  }
 }
+
 .erotica-action-label {
   display: inline-block;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--gold);
-  letter-spacing: 0.04em;
-  margin-bottom: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--rose-hot), var(--rose-deep));
+  box-shadow: 0 2px 12px rgba(255, 77, 125, 0.35);
 }
+
 .erotica-action p {
   margin: 0;
-  font-size: 0.88rem;
-  line-height: 1.65;
-  color: #ffe8f0;
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: #ffe0ec;
   font-weight: 500;
 }
 .erotica-play-bar {
@@ -1497,14 +1612,23 @@ body.in-game .app {
 .erotica-play-bar .btn-ghost-sm {
   flex: 1;
   font-size: 0.78rem;
-  padding: 8px 10px;
-  border: 1px solid rgba(212, 86, 122, 0.35);
-  background: rgba(212, 86, 122, 0.08);
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 100, 140, 0.35);
+  background: rgba(255, 77, 125, 0.1);
+  color: var(--rose-soft);
+  border-radius: var(--radius-sm);
 }
+
+.erotica-play-bar .btn-ghost-sm:hover {
+  background: rgba(255, 77, 125, 0.18);
+  color: #fff;
+}
+
 .erotica-footer {
   flex-shrink: 0;
-  padding: 12px 14px 20px;
-  border-top: 1px solid var(--glass-border);
+  padding: 14px 16px 22px;
+  border-top: 1px solid rgba(255, 100, 140, 0.15);
+  background: linear-gradient(to top, rgba(12, 4, 8, 0.95), transparent);
   display: flex;
   flex-direction: column;
   gap: 8px;
