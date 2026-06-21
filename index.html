@@ -70,7 +70,7 @@
           <em>🎯</em><strong>挑战模式</strong><small>10 种专题 · 每关独立文案</small>
         </button>
         <button class="hub-card featured" data-mode="story">
-          <em>📖</em><strong>场景故事</strong><small>10 种剧情 · 四幕循序渐进</small>
+          <em>📖</em><strong>场景故事</strong><small>34 种剧情 · 四幕循序渐进</small>
         </button>
         <button class="hub-card" data-mode="free">
           <em>🃏</em><strong>自由模式</strong><small>卡牌/骰子/轮盘/盲选/情境</small>
@@ -130,12 +130,21 @@
     <section id="screen-scene-pick" class="screen">
       <div class="pick-card glass">
         <h2>选择场景</h2>
-        <p class="pick-sub">每段故事分 4 幕，从暧昧到深入。选好后按剧情演绎即可。</p>
+        <p class="pick-sub">34 种地点剧情，每段分 4 幕从暧昧到深入。可按强度与地点筛选。</p>
+        <p class="scene-filter-label">强度</p>
         <div class="scene-filter-row">
           <label class="scene-filter"><input type="radio" name="scene-filter" value="all" checked><span>全部</span></label>
           <label class="scene-filter"><input type="radio" name="scene-filter" value="warm"><span>🫦 偏前戏</span></label>
           <label class="scene-filter"><input type="radio" name="scene-filter" value="hot"><span>🔥 偏火热</span></label>
           <label class="scene-filter"><input type="radio" name="scene-filter" value="deep"><span>💦 偏深入</span></label>
+        </div>
+        <p class="scene-filter-label">地点</p>
+        <div class="scene-filter-row scene-cat-row">
+          <label class="scene-filter"><input type="radio" name="scene-cat-filter" value="all" checked><span>全部</span></label>
+          <label class="scene-filter"><input type="radio" name="scene-cat-filter" value="public"><span>🏢 公共场所</span></label>
+          <label class="scene-filter"><input type="radio" name="scene-cat-filter" value="vehicle"><span>🚗 交通工具</span></label>
+          <label class="scene-filter"><input type="radio" name="scene-cat-filter" value="indoor"><span>🏠 室内私密</span></label>
+          <label class="scene-filter"><input type="radio" name="scene-cat-filter" value="outdoor"><span>🌿 户外自然</span></label>
         </div>
         <div id="scene-list" class="scene-list"></div>
         <button id="btn-scene-back" class="btn-ghost">返回大厅</button>
@@ -385,6 +394,7 @@
   <script src="content-extra.js"></script>
   <script src="challenges.js"></script>
   <script src="scenes.js"></script>
+  <script src="scenes-extra.js"></script>
   <script src="profile.js"></script>
   <script src="voice.js"></script>
   <script src="sync.js"></script>

@@ -1,11 +1,19 @@
 /* 蜜语 · 场景故事库（可选场景 · 循序渐进） */
 
+const SCENE_CATEGORY_LABELS = {
+  public: "🏢 公共场所",
+  vehicle: "🚗 交通工具",
+  indoor: "🏠 室内私密",
+  outdoor: "🌿 户外自然",
+};
+
 const SCENE_CATALOG = {
   rain_reunion: {
     id: "rain_reunion",
     name: "雨夜重逢",
     icon: "🌧",
     tagline: "门外雨声，门内体温",
+    category: "indoor",
     desc: "一方刚回家，衣裳微湿。从门廊拥抱到浴室共浴，最后在床上把思念做成肉体。",
     color: "#6a9ec7",
     stages: [
@@ -62,6 +70,7 @@ const SCENE_CATALOG = {
     name: "酒店一夜",
     icon: "🏨",
     tagline: "陌生城市，熟悉身体",
+    category: "indoor",
     desc: "旅行中的高级客房。落地窗、迷你吧、浴袍——从调酒到床幔，一夜不许浪费。",
     color: "#c9a86c",
     stages: [
@@ -117,6 +126,7 @@ const SCENE_CATALOG = {
     name: "办公室加班",
     icon: "💼",
     tagline: "加班是借口，欲望是真相",
+    category: "indoor",
     desc: "深夜空荡的办公区。百叶窗、会议桌、老板椅——权力与制服的游戏。",
     color: "#4a5568",
     stages: [
@@ -172,6 +182,7 @@ const SCENE_CATALOG = {
     name: "海边假期",
     icon: "🏖",
     tagline: "防晒油、比基尼、晚潮",
+    category: "outdoor",
     desc: "私人沙滩与民宿露台。阳光把皮肤晒热，夜里海风把欲望吹旺。",
     color: "#e8b86d",
     stages: [
@@ -227,6 +238,7 @@ const SCENE_CATALOG = {
     name: "私教课时",
     icon: "🏋",
     tagline: "拉伸、汗水、更衣室",
+    category: "indoor",
     desc: "闭馆后的健身房只剩你们。器械、瑜伽垫、淋浴间——用身体完成最后一组。",
     color: "#7dffb2",
     stages: [
@@ -282,6 +294,7 @@ const SCENE_CATALOG = {
     name: "摄影棚",
     icon: "📷",
     tagline: "镜头之内，欲望之外",
+    category: "indoor",
     desc: "私房拍摄。灯架、背景布、单反——快门每响一次，衣服就少一件。",
     color: "#b8a0e8",
     stages: [
@@ -337,6 +350,7 @@ const SCENE_CATALOG = {
     name: "酒吧邂逅",
     icon: "🍸",
     tagline: "假装初见，其实渴望已久",
+    category: "public",
     desc: "吧台、舞池、出租车后座——像第一次那样调情，像第一百次那样熟练。",
     color: "#d4567a",
     stages: [
@@ -392,6 +406,7 @@ const SCENE_CATALOG = {
     name: "冬夜壁炉",
     icon: "🔥",
     tagline: "外面下雪，里面出汗",
+    category: "indoor",
     desc: "毯子、火光、热可可——从指尖回暖到全身燃烧。",
     color: "#e87d4a",
     stages: [
@@ -447,6 +462,7 @@ const SCENE_CATALOG = {
     name: "角色互换夜",
     icon: "🔄",
     tagline: "今晚主动权换边",
+    category: "indoor",
     desc: "平时谁主导，今晚就换谁来命令。四幕剧：试探、接管、臣服、双赢。",
     color: "#9e3058",
     stages: [
@@ -502,6 +518,7 @@ const SCENE_CATALOG = {
     name: "纪念日重演",
     icon: "💍",
     tagline: "旧日重温，今夜加码",
+    category: "indoor",
     desc: "从第一次约会到第一次亲热，一幕幕重演——每一幕都比当年更色。",
     color: "#ffd700",
     stages: [

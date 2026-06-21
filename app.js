@@ -940,10 +940,16 @@ function getScenePeakIntensity(scene) {
 }
 
 function renderSceneList() {
-  const filter = document.querySelector('input[name="scene-filter"]:checked')?.value || "all";
-  const list = getSceneList().filter((s) => filter === "all" || getScenePeakIntensity(s) === filter);
-  $("#scene-list").innerHTML = list.map((s) => {
+  const intensityFilter = document.querySelector('input[name="scene-filter"]:checked')?.value || "all";
+  const catFilter = document.querySelector('input[name="scene-cat-filter"]:checked')?.value || "all";
+  const list = getSceneList().filter((s) => {
+    const intensityOk = intensityFilter === "all" || getScenePeakIntensity(s) === intensityFilter;
+    const catOk = catFilter === "all" || (s.category || "indoor") === catFilter;
+    return intensityOk && catOk;
+  });
+  $("#scene-list").innerHTML = list.length ? list.map((s) => {
     const acts = s.stages?.length || 4;
+    const cat = SCENE_CATEGORY_LABELS?.[s.category || "indoor"] || "";
     const last = profile.lastSceneId === s.id ? '<span class="scene-last">上次玩过</span>' : "";
     return `<button class="scene-card" data-id="${s.id}" style="--scene-accent:${s.color || "#d4567a"}">
       <span class="scene-icon">${s.icon}</span>
@@ -951,11 +957,11 @@ function renderSceneList() {
         <strong>${s.name}</strong>
         <em>${s.tagline}</em>
         <p>${s.desc}</p>
-        <span class="scene-meta">${acts} 幕 · ${INTENSITY_LABELS[getScenePeakIntensity(s)]}</span>
+        <span class="scene-meta">${cat} · ${acts} 幕 · ${INTENSITY_LABELS[getScenePeakIntensity(s)]}</span>
         ${last}
       </div>
     </button>`;
-  }).join("");
+  }).join("") : '<p class="scene-empty">没有符合筛选条件的场景，试试放宽筛选。</p>';
   $$(".scene-card").forEach((b) => b.addEventListener("click", () => startStory(b.dataset.id)));
 }
 
@@ -963,8 +969,17 @@ function populateSceneSelect() {
   const sel = $("#free-scene-select");
   if (!sel) return;
   const cur = sel.value;
-  sel.innerHTML = '<option value="">🎲 随机混合（全库情境）</option>'
-    + getSceneList().map((s) => `<option value="${s.id}">${s.icon} ${s.name} — ${s.tagline}</option>`).join("");
+  const cats = ["public", "vehicle", "indoor", "outdoor"];
+  let html = '<option value="">🎲 随机混合（全库情境）</option>';
+  cats.forEach((cat) => {
+    const items = getSceneList().filter((s) => (s.category || "indoor") === cat);
+    if (!items.length) return;
+    const label = SCENE_CATEGORY_LABELS?.[cat] || cat;
+    html += `<optgroup label="${label}">`;
+    html += items.map((s) => `<option value="${s.id}">${s.icon} ${s.name} — ${s.tagline}</option>`).join("");
+    html += "</optgroup>";
+  });
+  sel.innerHTML = html;
   if (cur) sel.value = cur;
   else if (profile.lastSceneId) sel.value = profile.lastSceneId;
 }
@@ -1231,6 +1246,7 @@ $("#btn-clear-menu").addEventListener("click", () => { saveGame(); showScreen("h
 $("#btn-challenge-back").addEventListener("click", () => showScreen("hub"));
 $("#btn-scene-back").addEventListener("click", () => showScreen("hub"));
 $$('input[name="scene-filter"]').forEach((r) => r.addEventListener("change", renderSceneList));
+$$('input[name="scene-cat-filter"]').forEach((r) => r.addEventListener("change", renderSceneList));
 $$('input[name="mode"]').forEach((r) => r.addEventListener("change", updateFreeSceneField));
 $("#btn-free-start").addEventListener("click", () => startFreeGame());
 $("#btn-free-back").addEventListener("click", () => showScreen("hub"));

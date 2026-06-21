@@ -991,7 +991,10 @@ body.in-game .app {
 .pick-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
 .pick-sub { font-size: 0.78rem; color: var(--text-muted); margin: -8px 0 14px; line-height: 1.5; }
 
+.scene-filter-label { font-size: 0.7rem; color: var(--text-muted); text-align: left; margin: 0 0 6px; }
 .scene-filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.scene-cat-row { margin-bottom: 10px; }
+.scene-empty { font-size: 0.78rem; color: var(--text-muted); padding: 20px 0; }
 .scene-filter { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--text-muted); cursor: pointer; padding: 6px 10px; border-radius: 20px; border: 1px solid var(--glass-border); }
 .scene-filter:has(input:checked) { border-color: var(--scene-accent, var(--rose)); color: var(--text); background: rgba(212,86,122,0.1); }
 .scene-filter input { accent-color: var(--rose-hot); }
