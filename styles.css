@@ -1913,6 +1913,41 @@ body.in-game .app {
   padding-top: 0.75em;
   border-top: 1px dashed rgba(255, 77, 125, 0.2);
 }
+.orion-strategy-manual .orion-strategy-head {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  margin-bottom: 0.5em;
+}
+.orion-strategy-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 1em;
+}
+.orion-strategy-tips {
+  margin: 0;
+  padding-left: 1.1em;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+}
+.orion-strategy-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.orion-strategy-card {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 77, 125, 0.06);
+  border: 1px solid rgba(255, 77, 125, 0.15);
+  font-size: 0.72rem;
+}
+.orion-strategy-card.locked { opacity: 0.45; }
+.orion-strategy-card span { font-size: 1.1rem; display: block; margin-bottom: 2px; }
+.orion-strategy-card strong { display: block; font-size: 0.78rem; color: var(--rose-soft); }
+.orion-strategy-card small { color: var(--text-dim); line-height: 1.35; }
+.orion-strategy-card em { display: block; margin-top: 4px; font-style: normal; color: var(--text-muted); font-size: 0.65rem; }
+.orion-strategy-stage strong { color: var(--stage-color, var(--rose-hot)); }
 .orion-h-phase-bar {
   display: flex;
   gap: 6px;

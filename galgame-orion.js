@@ -70,6 +70,7 @@ function orionLoadRun() {
   ensureGalProfile();
   if (profile.galgame.orionState && !profile.galgame.orionState.ended) {
     orionState = profile.galgame.orionState;
+    if (!orionState.strategyUsedToday) orionState.strategyUsedToday = {};
     return true;
   }
   return false;
@@ -107,9 +108,10 @@ function orionStartRun() {
     },
     ended: false,
     sexOutfit: {},
+    strategyUsedToday: {},
   };
   orionSaveRun();
-  orionRender(`青藤大学的夜，从你选择「想怎么被操、怎么操人」开始。十二周、五个女人、十次肉体纠缠——慢慢来，让每一次呼吸都听得见。`);
+  orionRender(`青藤大学的夜，从你选择「想怎么被操、怎么操人」开始。十八周、五个女人、十二幕剧情与专属攻略——慢慢来，让每一次呼吸都听得见。`);
 }
 
 function orionEnterGame() {
@@ -147,8 +149,20 @@ function orionDrawRandomEvent(logText = "") {
     orionRender(logText || milestone.text);
     return;
   }
+  if (orionState.day === 2 && Math.random() < 0.42) {
+    orionOpenDayHook(2, logText);
+    return;
+  }
   if (orionState.day === 4 && Math.random() < 0.55) {
     orionOpenMidWeekEvent(logText);
+    return;
+  }
+  if (orionState.day === 5 && Math.random() < 0.48) {
+    orionOpenDayHook(5, logText);
+    return;
+  }
+  if (orionState.day === 6 && Math.random() < 0.45) {
+    orionOpenDayHook(6, logText);
     return;
   }
   orionState.sceneMode = "event";
@@ -163,6 +177,43 @@ function orionDrawRandomEvent(logText = "") {
   });
   orionState.current = weighted[Math.floor(Math.random() * weighted.length)];
   orionRender(logText);
+}
+
+function orionOpenDayHook(dayNum, logText) {
+  const hook = orionDayHooks?.[dayNum];
+  if (!hook) { orionDrawRandomEvent(logText); return; }
+  orionState.sceneMode = "event";
+  orionState.beatIndex = 0;
+  const ranked = orionPeople()
+    .map((p) => ({ p, aff: orionState.relationships[p.id].affection }))
+    .sort((a, b) => b.aff - a.aff);
+  const top = ranked[0];
+  if (top.aff >= 1 && Math.random() < 0.72) {
+    const person = top.p;
+    const rel = orionState.relationships[person.id];
+    orionState.current = {
+      type: "person",
+      person: person.id,
+      location: hook.title,
+      title: `${person.name} · ${hook.title}`,
+      text: `${hook.person(person.name)}\n\n${orionBuildDateText(person, rel)}`,
+      tags: ["深夜"],
+      beats: [
+        { speaker: person.name, text: galFill(orionPickDialogue(person.id, "flirt_ok", rel.dates)) },
+        { speaker: "旁白", text: "她看你的眼神，和白天不一样——像已经算好你会选哪一招。" },
+      ],
+    };
+  } else {
+    orionState.current = {
+      type: "campus",
+      person: null,
+      location: hook.title,
+      title: hook.title,
+      text: hook.campus,
+      tags: ["深夜"],
+    };
+  }
+  orionRender(logText || hook.title);
 }
 
 function orionOpenMidWeekEvent(logText) {
@@ -298,6 +349,7 @@ function orionNextDay() {
     orionState.spark = orionClamp(orionState.spark + 1, 0, 14);
   }
   orionState.day += 1;
+  orionState.strategyUsedToday = {};
   if (orionState.day !== 7) orionState.weather = orionRollWeather();
 }
 
@@ -352,6 +404,7 @@ function orionGetChoices(event) {
     { label: "坦白局", hint: "信任 +3", run: () => orionReward({ trust: 3 }, "把炮友关系说清楚，反而更色。") },
   ];
   if (mode === "gallery") return [{ label: "返回", hint: "回校园", run: () => { orionState.sceneMode = orionState.galleryReturnMode || "event"; orionRender(); } }];
+  if (mode === "strategy") return orionGetStrategyChoices(event);
   if (mode === "playmenu") return orionGetPlayMenuChoices(event);
   if (mode === "play") return orionGetPlaySceneChoices(event);
   if (mode === "adult") return orionGetAdultChoices(event);
@@ -376,11 +429,33 @@ function orionGetChoices(event) {
 function orionGetPersonChoices(event) {
   const person = orionPeople().find((p) => p.id === event.person);
   const rel = orionState.relationships[person.id];
+  const stage = orionGetRelationStage(rel);
+  const availStrats = orionGetStrategyDefs(person).filter((d) => orionStrategyAvailable(d, person, rel));
   const choices = [
     { label: "🌙 单独约会", hint: "长对话 · 好感与性奋上升", run: () => orionDatePerson(person, rel) },
     { label: "💋 撩她", hint: "目光与指尖 · 魅力检定", run: () => orionFlirt(person, rel) },
     { label: "🫂 深夜谈心", hint: "欲望与底线说开", run: () => orionDeepTalk(person, rel) },
+    { label: `📖 攻略手册（${stage.label}）`, hint: `${availStrats.length} 招可用 · 专属手段`, run: () => orionOpenStrategyManual(person.id) },
   ];
+  if (availStrats.length) {
+    const top = availStrats[0];
+    choices.splice(3, 0, {
+      label: `${top.icon} ${top.name}`,
+      hint: top.hint,
+      run: () => orionExecuteStrategy(person, top.id),
+    });
+  }
+  if (rel.affection >= 3) {
+    const topId = availStrats[0]?.id;
+    const edge = availStrats.find((d) => d.id === "edge" && d.id !== topId)
+      || availStrats.find((d) => ["edge_sketch", "library_corner", "massage_ice"].includes(d.id) && d.id !== topId);
+    if (edge) {
+      choices.push({ label: `🔥 ${edge.name}`, hint: edge.hint, run: () => orionExecuteStrategy(person, edge.id) });
+    }
+  }
+  if (rel.affection >= 6 && !rel.clear) {
+    choices.push({ label: "💗 表白检定", hint: "信任+魅力 · 确认关系", run: () => orionExecuteStrategy(person, "confess") });
+  }
   if (rel.affection >= 3) {
     choices.push({ label: "野战邀约", hint: "检定魅力，成功大幅好感", run: () => orionIntenseApproach(person, rel) });
   }
@@ -785,6 +860,9 @@ function orionBuildSceneContent(event) {
   if (orionState.sceneMode === "adult" || orionState.sceneMode === "gallery") {
     return { html: true, text: orionBuildHPhaseHtml(event) };
   }
+  if (orionState.sceneMode === "strategy") {
+    return { html: true, text: event.text };
+  }
   return { html: true, text: orionBuildImmersiveEventHtml(event) };
 }
 
@@ -862,9 +940,11 @@ function orionRender(logText = "") {
 
   orionEls.orion_relationships.innerHTML = orionPeople().map((p) => {
     const rel = orionState.relationships[p.id];
+    const stage = orionGetRelationStage(rel);
+    const clearTag = rel.clear ? " · 已确认" : "";
     return `<article class="orion-person" style="--person-accent:${p.color}">
-      <div class="orion-person-head"><strong>${p.icon} ${p.name}</strong><span>${rel.affection}/14 · 亲密${rel.intimacy}</span></div>
-      <small>${p.role}</small>
+      <div class="orion-person-head"><strong>${p.icon} ${p.name}</strong><span style="color:${stage.color}">${stage.label}</span></div>
+      <small>${p.role} · ${rel.affection}/14 · 亲密${rel.intimacy}${clearTag}</small>
       <small>H ${rel.scenes.length}/${orionAdultScenes[p.id].length} · 故事 ${rel.story}/${orionStorylines[p.id].length}${(rel.kinks?.length) ? ` · 玩法${rel.kinks.length}` : ""}</small>
       <div class="gal-mini-bar"><div class="gal-mini-fill" style="width:${rel.affection * 10}%"></div></div>
     </article>`;
