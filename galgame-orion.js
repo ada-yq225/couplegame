@@ -71,6 +71,7 @@ function orionLoadRun() {
   if (profile.galgame.orionState && !profile.galgame.orionState.ended) {
     orionState = profile.galgame.orionState;
     if (!orionState.strategyUsedToday) orionState.strategyUsedToday = {};
+    if (!orionState.breatherSeen) orionState.breatherSeen = {};
     return true;
   }
   return false;
@@ -111,7 +112,7 @@ function orionStartRun() {
     strategyUsedToday: {},
   };
   orionSaveRun();
-  orionRender(`青藤大学的夜，从你选择「想怎么被操、怎么操人」开始。十八周、五个女人、十二幕剧情与专属攻略——慢慢来，让每一次呼吸都听得见。`);
+  orionRender(`青藤大学的夜，从你选择「想怎么被操、怎么操人」开始。二十四周、四幕剧情、五个女人与专属攻略——慢慢来，让每一次呼吸都听得见。`);
 }
 
 function orionEnterGame() {
@@ -129,6 +130,14 @@ function orionEnterGame() {
 function orionDrawRandomEvent(logText = "") {
   if (orionCheckEnding()) return;
   if (orionState.day === 7) {
+    if (typeof ORION_BREATHER_WEEKS !== "undefined" && ORION_BREATHER_WEEKS.includes(orionState.week)) {
+      if (!orionState.breatherSeen) orionState.breatherSeen = {};
+      if (!orionState.breatherSeen[orionState.week]) {
+        orionState.breatherSeen[orionState.week] = true;
+        orionOpenBreatherWeek(logText);
+        return;
+      }
+    }
     orionOpenExam(logText);
     return;
   }
@@ -147,6 +156,10 @@ function orionDrawRandomEvent(logText = "") {
       tags: [],
     };
     orionRender(logText || milestone.text);
+    return;
+  }
+  if (orionState.day === 1 && Math.random() < 0.38) {
+    orionOpenDayHook(1, logText);
     return;
   }
   if (orionState.day === 2 && Math.random() < 0.42) {
@@ -360,7 +373,7 @@ function orionNextDay() {
 function orionNextWeek() {
   orionState.day = 1;
   orionState.week += 1;
-  orionState.energy = orionClamp(orionState.energy + 4, 0, 14);
+  orionState.energy = orionClamp(orionState.energy + 5, 0, 14);
   orionState.stress = orionClamp(orionState.stress - 2, 0, 14);
   orionState.weather = orionRollWeather();
   if (orionState.week <= ORION_WEEKS) orionChooseWeeklyReward();
@@ -401,12 +414,19 @@ function orionGetChoices(event) {
     label: p.name, hint: p.style,
     run: () => { orionState.routePlan = p.id; orionState.sceneMode = "event"; orionRender(`策略：${p.name}。校园生活开始。`); orionDrawRandomEvent(); },
   }));
-  if (mode === "reward") return [
-    { label: "零花钱", hint: "金钱 +5", run: () => orionReward({ money: 5 }, "零花钱到账，可以买套了。") },
-    { label: "睡饱", hint: "体力 +5 欲压 -3", run: () => orionReward({ energy: 5, stress: -3 }, "睡饱又能硬了。") },
-    { label: "春梦", hint: "性奋 +3 魅力 +1", run: () => orionReward({ spark: 3, charm: 1 }, "梦里操过了，醒来更饿。") },
-    { label: "坦白局", hint: "信任 +3", run: () => orionReward({ trust: 3 }, "把炮友关系说清楚，反而更色。") },
-  ];
+  if (mode === "reward") {
+    const base = [
+      { label: "零花钱", hint: "金钱 +5", run: () => orionReward({ money: 5 }, "零花钱到账，可以买套了。") },
+      { label: "睡饱", hint: "体力 +5 欲压 -3", run: () => orionReward({ energy: 5, stress: -3 }, "睡饱又能硬了。") },
+      { label: "春梦", hint: "性奋 +3 魅力 +1", run: () => orionReward({ spark: 3, charm: 1 }, "梦里操过了，醒来更饿。") },
+      { label: "坦白局", hint: "信任 +3", run: () => orionReward({ trust: 3 }, "把炮友关系说清楚，反而更色。") },
+    ];
+    if (orionState.breatherMode) return typeof orionGetBreatherChoices === "function" ? orionGetBreatherChoices() : base;
+    if (orionState.week >= 8 && typeof ORION_WEEKLY_EXTRA_REWARDS !== "undefined") {
+      return base.concat(ORION_WEEKLY_EXTRA_REWARDS);
+    }
+    return base;
+  }
   if (mode === "gallery") return [{ label: "返回", hint: "回校园", run: () => { orionState.sceneMode = orionState.galleryReturnMode || "event"; orionRender(); } }];
   if (mode === "strategy") return orionGetStrategyChoices(event);
   if (mode === "playmenu") return orionGetPlayMenuChoices(event);
@@ -721,8 +741,9 @@ function orionIntenseApproach(person, rel) {
 }
 
 function orionCanAdvanceStory(personId, rel) {
-  const need = Math.max(2, 1 + rel.story * 2 - (orionHasTrait("story") ? 1 : 0));
-  return Boolean(orionStorylines[personId]?.[rel.story]) && rel.affection >= need && orionState.spark >= 1;
+  const need = Math.max(2, Math.min(13, 2 + rel.story - (orionHasTrait("story") ? 1 : 0)));
+  const sparkNeed = rel.story >= 8 ? 2 : 1;
+  return Boolean(orionStorylines[personId]?.[rel.story]) && rel.affection >= need && orionState.spark >= sparkNeed;
 }
 
 function orionAdvanceStory(person, rel) {
@@ -934,9 +955,11 @@ function orionSetSceneContent(payload) {
 }
 
 function orionSyncWeekDisplay() {
-  const weekKicker = document.querySelector(".orion-kicker");
+  const weekKicker = document.querySelector(".orion-topbar .orion-kicker");
+  const arc = typeof orionGetSemesterArc === "function" ? orionGetSemesterArc(orionState.week) : null;
+  const arcLabel = arc ? ` · ${arc.label}` : "";
   if (weekKicker) {
-    weekKicker.innerHTML = `第 <span id="orion-week">${orionState.week}</span> 周 / ${ORION_WEEKS} · 第 <span id="orion-day">${orionState.day}</span> 天 · <span id="orion-weather">${orionState.weather}</span>`;
+    weekKicker.innerHTML = `第 <span id="orion-week">${orionState.week}</span> 周 / ${ORION_WEEKS}${arcLabel} · 第 <span id="orion-day">${orionState.day}</span> 天 · <span id="orion-weather">${orionState.weather}</span>`;
     orionEls.orion_week = $("#orion-week");
     orionEls.orion_day = $("#orion-day");
     orionEls.orion_weather = $("#orion-weather");
