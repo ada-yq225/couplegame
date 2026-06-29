@@ -200,7 +200,7 @@ function orionIsPureLoveRoute() {
     orionEndings.purelove = "二十四周过去，你与 {name} 从牵手到拥抱，从晚安吻到凌晨相依。六档关系一路走扎实，肉体在爱里变软，色情在信任里发烫——你们不是炮友，是恋人。门后仍会缠绵，门外十指紧扣。";
   }
 
-  if (typeof ORION_WEEKLY_EXTRA_REWARDS !== "undefined") {
+  if (typeof ORION_WEEKLY_EXTRA_REWARDS !== "undefined" && !ORION_WEEKLY_EXTRA_REWARDS.some((r) => r.label === "纯爱周末")) {
     ORION_WEEKLY_EXTRA_REWARDS.push(
       { label: "纯爱周末", hint: "信任 +3 欲压 -3", run: () => orionReward({ trust: 3, stress: -3 }, "周末只有牵手和拥抱，心却更烫了。") },
       { label: "晚安吻", hint: "好感随机+2 性奋 +1", run: () => orionWeeklyPureKiss() },
@@ -311,106 +311,3 @@ function orionPureGoodnightKiss(person, rel) {
   orionApplyChoice({ energy: -1, stress: -1 }, "", person.id);
 }
 
-(function orionWrapPureLoveEngine() {
-  const origAdvance = orionAdvanceStory;
-  orionAdvanceStory = function (person, rel) {
-    const pure = orionIsPureLoveRoute() && ORION_PURE_STORYLINES?.[person.id]?.[rel.story];
-    const ch = pure || orionStorylines[person.id][rel.story];
-    orionState.spark = orionClamp(orionState.spark - (orionIsPureLoveRoute() ? 0 : 1), 0, 14);
-    rel.story += 1;
-    const affGain = (orionPreferenceMatches(person.id) ? 2 : 1) + (orionState.routePlan === "deep" ? 1 : 0) + (orionIsPureLoveRoute() ? 1 : 0);
-    rel.affection = orionClamp(rel.affection + affGain, 0, 14);
-    if (orionIsPureLoveRoute()) orionState.trust = orionClamp(orionState.trust + 1, 0, 14);
-    const label = pure ? `纯爱剧情 · ${ch[0]}` : `剧情 · ${ch[0]}`;
-    const storyHtml = orionFormatSense(orionPickSense(orionState.weather, orionState.current?.location || "校园"))
-      + orionFormatStage(label, orionFormatParagraphs(ch[1]));
-    orionState.pendingLogHtml = `${storyHtml}<p class="orion-log-meta">故事 ${rel.story}/${orionStorylines[person.id].length}${orionIsPureLoveRoute() ? " · 纯爱线" : ""}</p>`;
-    orionApplyChoice({ energy: -1, stress: orionIsPureLoveRoute() ? -2 : -1 }, "", person.id);
-  };
-
-  const origDate = orionDatePerson;
-  orionDatePerson = function (person, rel) {
-    if (!orionIsPureLoveRoute()) return origDate(person, rel);
-    let gain = 2 + (orionHasTrait("listen") ? 1 : 0) + (orionHasTrait("talk") ? 1 : 0) + 1;
-    if (orionPreferenceMatches(person.id)) gain += 1;
-    rel.affection = orionClamp(rel.affection + gain, 0, 14);
-    rel.dates += 1;
-    orionState.trust = orionClamp(orionState.trust + 1, 0, 14);
-    orionState.spark = orionClamp(orionState.spark + 1, 0, 14);
-    const text = orionBuildPureDateText(person, rel);
-    const wrapped = orionWrapDateImmersive(person, rel, `${text}\n\n夜色温柔。她看你的眼神，像把整颗心递过来。`);
-    orionState.pendingLogHtml = `${wrapped}<p class="orion-log-meta">好感 +${gain} · 信任 +1 · 纯爱约会</p>`;
-    orionApplyChoice({ energy: -2, stress: -2 }, "", person.id);
-  };
-
-  const origDeep = orionDeepTalk;
-  orionDeepTalk = function (person, rel) {
-    if (!orionIsPureLoveRoute()) return origDeep(person, rel);
-    rel.affection += 2 + Math.min(rel.story, 3);
-    orionState.trust = orionClamp(orionState.trust + 2, 0, 14);
-    const pool = ORION_PURE_DIALOGUE[person.id]?.deep;
-    const core = pool?.length ? pool[(rel.story + rel.dates) % pool.length] : orionBuildDeepText(person, rel);
-    orionState.pendingLogHtml = orionWrapDateImmersive(person, rel, `【谈心 · 纯爱】\n${core}`) + `<p class="orion-log-meta">信任 +2 · 心靠得更近</p>`;
-    orionApplyChoice({ energy: -1, stress: -2 }, "", person.id);
-  };
-
-  const origCanStory = orionCanAdvanceStory;
-  orionCanAdvanceStory = function (personId, rel) {
-    if (!origCanStory(personId, rel)) return false;
-    if (orionIsPureLoveRoute() && orionState.trust < 3 && rel.story >= 4) return false;
-    return true;
-  };
-
-  const origGetPerson = orionGetPersonChoices;
-  orionGetPersonChoices = function (event) {
-    const choices = origGetPerson(event);
-    if (!event?.person || !orionIsPureLoveRoute()) return choices;
-    const person = orionPeople().find((p) => p.id === event.person);
-    const rel = orionState.relationships[event.person];
-    return person && rel ? orionPureLovePersonChoices(person, rel, choices) : choices;
-  };
-
-  const origSceneBody = orionGetSceneBody;
-  orionGetSceneBody = function (sceneId) {
-    if (orionIsPureLoveRoute() && ORION_PURE_SCENE_CONTENT?.[sceneId]?.body) {
-      return ORION_PURE_SCENE_CONTENT[sceneId].body.trim();
-    }
-    return origSceneBody(sceneId);
-  };
-
-  const origCheck = orionCheckEnding;
-  orionCheckEnding = function () {
-    if (orionState.week > ORION_WEEKS && orionIsPureLoveRoute()) {
-      const ranked = orionPeople()
-        .map((p) => ({ ...p, ...orionState.relationships[p.id] }))
-        .sort((a, b) => b.affection + b.trust * 2 + b.story - (a.affection + a.trust * 2 + a.story))[0];
-      const storyDone = ranked.story >= orionStorylines[ranked.id].length;
-      if (ranked.affection >= 10 && ranked.trust >= 8 && storyDone && ranked.clear) {
-        orionState.ended = true;
-        orionRenderEnding(orionEndings.purelove.replace("{name}", ranked.name));
-        return true;
-      }
-    }
-    return origCheck();
-  };
-
-  if (typeof ORION_FOREPLAY_FLAVOR !== "undefined") {
-    const softFp = {
-      finger: "手指缓缓探入，她抖着抱紧你，穴肉温柔绞住，淫水濡湿却不粗暴，像把心也交出来。",
-      oral: "她含住你，眼神向上，温柔侍奉，每一下都像在说我爱你。",
-      tease: "你只磨不入，她眼泪掉下来却笑：「……混蛋……但……想要你……轻一点进来……」",
-      breast: "你吻乳尖，她抱你头，胸口起伏，下面湿了，轻声：「……可以……慢一点……」",
-    };
-    const origBuildH = orionBuildHPhaseHtml;
-    orionBuildHPhaseHtml = function (event) {
-      if (orionIsPureLoveRoute()) {
-        const saved = { ...ORION_FOREPLAY_FLAVOR };
-        Object.assign(ORION_FOREPLAY_FLAVOR, softFp);
-        const html = origBuildH(event);
-        Object.assign(ORION_FOREPLAY_FLAVOR, saved);
-        return html;
-      }
-      return origBuildH(event);
-    };
-  }
-})();

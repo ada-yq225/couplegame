@@ -372,18 +372,23 @@ function orionBindChoiceButtonsRich(choices) {
     const cat = c._cat || orionChoiceCategory(c.label);
     const meta = ORION_CATEGORY_META[cat] || ORION_CATEGORY_META.default;
     const tip = c.hint ? orionEscapeHtml(c.hint) : "";
+    const label = orionEscapeHtml(c.label);
     return `<button type="button" class="orion-choice orion-choice-${cat}" data-i="${i}" title="${tip}">
       <span class="orion-choice-cat">${meta.icon} ${meta.label}</span>
-      <span class="orion-choice-main"><strong>${c.label}</strong>${tip ? `<small>${tip}</small>` : ""}</span>
+      <span class="orion-choice-main"><strong>${label}</strong>${tip ? `<small>${tip}</small>` : ""}</span>
       <span class="orion-choice-arrow" aria-hidden="true">›</span>
     </button>`;
   }).join("");
 }
 
 function orionInitOrionUI() {
-  document.getElementById("btn-orion-guide")?.addEventListener("click", () => {
-    const panel = document.getElementById("orion-guide-panel");
-    const open = panel?.classList.contains("hidden");
-    orionRenderGuidePanel(open);
-  });
+  const guideBtn = document.getElementById("btn-orion-guide");
+  if (guideBtn && !guideBtn.dataset.orionGuideBound) {
+    guideBtn.dataset.orionGuideBound = "1";
+    guideBtn.addEventListener("click", () => {
+      const panel = document.getElementById("orion-guide-panel");
+      const open = panel?.classList.contains("hidden");
+      orionRenderGuidePanel(open);
+    });
+  }
 }

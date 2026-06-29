@@ -316,6 +316,7 @@ function orionOpenShop() {
 
 function orionOpenAdultScene(personId) {
   const scenes = orionAdultScenes[personId];
+  if (!scenes?.length) { showToast?.("H 场景未加载", 2000); return; }
   const rel = orionState.relationships[personId];
   const unseen = scenes.filter((s) => !rel.scenes.includes(s.id));
   const list = unseen.length ? unseen : scenes;
@@ -490,11 +491,21 @@ function orionGetPersonChoices(event) {
     choices.push({ label: "野战邀约", hint: "检定魅力，成功大幅好感", run: () => orionIntenseApproach(person, rel) });
   }
   if (orionCanAdvanceStory(person.id, rel)) {
-    const ch = orionStorylines[person.id][rel.story];
-    choices.push({ label: `推进剧情：${ch[0]}`, hint: "耗性奋，好感暴涨", run: () => orionAdvanceStory(person, rel) });
+    const pureCh = typeof orionIsPureLoveRoute === "function" && orionIsPureLoveRoute() && ORION_PURE_STORYLINES?.[person.id]?.[rel.story];
+    const ch = pureCh || orionStorylines[person.id][rel.story];
+    const hint = typeof orionIsPureLoveRoute === "function" && orionIsPureLoveRoute() ? "纯爱十二幕 · 不耗性奋 · 信任+1" : "耗性奋，好感暴涨";
+    choices.push({ label: `推进剧情：${ch[0]}`, hint, run: () => orionAdvanceStory(person, rel) });
   }
-  if (rel.affection >= 5 && orionState.spark >= 1) {
-    choices.push({ label: "🔞 带她去做", hint: "分阶段沉浸 H：靠近→脱衣→前戏→插入→高潮", run: () => orionOpenAdultScene(person.id) });
+  const canH = rel.affection >= 5 && (
+    orionState.spark >= 1
+    || (typeof orionIsPureLoveRoute === "function" && orionIsPureLoveRoute() && orionState.trust >= 6)
+  );
+  if (canH) {
+    const hLabel = typeof orionIsPureLoveRoute === "function" && orionIsPureLoveRoute() ? "💕 温柔缠绵" : "🔞 带她去做";
+    const hHint = typeof orionIsPureLoveRoute === "function" && orionIsPureLoveRoute()
+      ? "纯爱 H · 慢磨缠绵 · 拥抱收尾"
+      : "分阶段沉浸 H：靠近→脱衣→前戏→插入→高潮";
+    choices.push({ label: hLabel, hint: hHint, run: () => orionOpenAdultScene(person.id) });
   }
   const plays = orionGetAvailablePlays(person);
   if (plays.length) {
@@ -539,6 +550,7 @@ function orionGetCampusChoices() {
 
 function orionGetAdultChoices(scene) {
   const person = orionPeople().find((p) => p.id === scene.person);
+  if (!person) return [{ label: "返回", hint: "回校园", run: () => { orionState.sceneMode = "event"; orionRender(); } }];
   const rel = orionState.relationships[person.id];
   const heroine = getHeroine(person.id);
   const phase = orionGetHPhase();
@@ -651,6 +663,7 @@ function orionGetAdultChoices(scene) {
 
 function orionGetPlayMenuChoices(event) {
   const person = orionPeople().find((p) => p.id === event.person);
+  if (!person) return [{ label: "返回", hint: "回校园", run: () => { orionState.sceneMode = "event"; orionRender(); } }];
   const plays = event.plays || orionGetAvailablePlays(person);
   return plays.map((play) => ({
     label: `${play.icon} ${play.name}`,
@@ -663,6 +676,7 @@ function orionGetPlayMenuChoices(event) {
 
 function orionGetPlaySceneChoices(event) {
   const person = orionPeople().find((p) => p.id === event.person);
+  if (!person) return [{ label: "返回", hint: "回校园", run: () => { orionState.sceneMode = "event"; orionDrawRandomEvent(""); } }];
   const rel = orionState.relationships[person.id];
   const playId = orionState.playId;
   if (playId === "dirty_talk") {
@@ -1091,12 +1105,19 @@ function initOrionGame() {
   $("#btn-orion-save")?.addEventListener("click", () => { orionSaveRun(); showToast?.("已保存", 1500); });
 
   orionEls.orion_choices = $("#orion-choices");
-  orionEls.orion_choices?.addEventListener("click", (ev) => {
-    const btn = ev.target.closest(".orion-choice");
-    if (!btn || !orionState?._choices) return;
-    const choice = orionState._choices[+btn.dataset.i];
-    if (choice?.run) choice.run();
-  });
+  const choicesEl = orionEls.orion_choices;
+  if (choicesEl && !choicesEl.dataset.orionChoiceBound) {
+    choicesEl.dataset.orionChoiceBound = "1";
+    const onChoice = typeof orionOnChoiceClick === "function"
+      ? orionOnChoiceClick
+      : (ev) => {
+        const btn = ev.target.closest(".orion-choice");
+        if (!btn || !orionState?._choices) return;
+        const choice = orionState._choices[+btn.dataset.i];
+        if (choice?.run) choice.run();
+      };
+    choicesEl.addEventListener("click", onChoice);
+  }
 
   $("#orion-relationships")?.addEventListener("click", (ev) => {
     const btn = ev.target.closest(".orion-gallery-btn");

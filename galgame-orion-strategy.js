@@ -285,6 +285,7 @@ function orionBuildStrategyManualHtml(person) {
 
 function orionOpenStrategyManual(personId) {
   const person = orionPeople().find((p) => p.id === personId);
+  if (!person) { showToast?.("角色数据缺失", 2000); return; }
   orionState.sceneMode = "strategy";
   orionState.current = {
     type: "person",
@@ -298,6 +299,9 @@ function orionOpenStrategyManual(personId) {
 
 function orionGetStrategyChoices(event) {
   const person = orionPeople().find((p) => p.id === event.person);
+  if (!person) {
+    return [{ label: "返回", hint: "回校园", run: () => { orionState.sceneMode = "event"; orionRender(); } }];
+  }
   const rel = orionState.relationships[person.id];
   const defs = orionGetStrategyDefs(person).filter((d) => orionStrategyAvailable(d, person, rel));
   const choices = defs.slice(0, 8).map((d) => ({
