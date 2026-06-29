@@ -967,11 +967,25 @@ function orionSyncWeekDisplay() {
 }
 
 function orionBindChoiceButtons(choices) {
+  if (typeof orionBindChoiceButtonsRich === "function") {
+    orionBindChoiceButtonsRich(choices);
+    return;
+  }
   orionState._choices = choices;
   if (!orionEls.orion_choices) return;
   orionEls.orion_choices.innerHTML = choices.map((c, i) =>
     `<button type="button" class="orion-choice" data-i="${i}"><strong>${c.label}</strong><small>${c.hint || ""}</small></button>`
   ).join("");
+}
+
+function orionFinishRenderUI(event) {
+  if (typeof orionRenderStatMeters === "function") orionRenderStatMeters();
+  if (typeof orionRenderProgressStrip === "function") orionRenderProgressStrip();
+  if (typeof orionRenderHintBar === "function") orionRenderHintBar(event);
+  if (typeof orionRenderInventoryPanel === "function") orionRenderInventoryPanel();
+  if (typeof orionMaybeShowFirstGuide === "function") orionMaybeShowFirstGuide();
+  const screen = document.getElementById("screen-gal-orion");
+  if (screen) screen.dataset.hasPerson = event?.person ? "1" : "0";
 }
 
 function orionRender(logText = "") {
@@ -1004,18 +1018,12 @@ function orionRenderInner(logText = "") {
     orionEls.orion_scene_title.textContent = e.title;
     orionSetSceneContent({ html: false, text: e.text });
     orionBindChoiceButtons(orionGetChoices(e));
+    orionFinishRenderUI(e);
     orionSaveRun();
     return;
   }
   const e = orionState.current;
-  orionEls.orion_weather.textContent = orionState.weather;
-  orionEls.orion_energy.textContent = orionState.energy;
-  orionEls.orion_stress.textContent = orionState.stress;
-  orionEls.orion_study.textContent = orionState.study;
-  orionEls.orion_charm.textContent = orionState.charm;
-  orionEls.orion_trust.textContent = orionState.trust;
-  orionEls.orion_money.textContent = orionState.money;
-  orionEls.orion_spark.textContent = orionState.spark;
+  if (orionEls.orion_weather) orionEls.orion_weather.textContent = orionState.weather;
   if (orionState.pendingLogHtml) {
     orionEls.orion_log.innerHTML = orionState.pendingLogHtml;
     orionState.pendingLogHtml = null;
@@ -1036,17 +1044,23 @@ function orionRenderInner(logText = "") {
     const rel = orionState.relationships[p.id];
     const stage = orionGetRelationStage(rel);
     const clearTag = rel.clear ? " · 已确认" : "";
-    return `<article class="orion-person" style="--person-accent:${p.color}">
-      <div class="orion-person-head"><strong>${p.icon} ${p.name}</strong><span style="color:${stage.color}">${stage.label}</span></div>
-      <small>${p.role} · ${rel.affection}/14 · 亲密${rel.intimacy}${clearTag}</small>
-      <small>H ${rel.scenes.length}/${orionAdultScenes[p.id].length} · 故事 ${rel.story}/${orionStorylines[p.id].length}${(rel.kinks?.length) ? ` · 玩法${rel.kinks.length}` : ""}</small>
+    const nextHint = typeof orionBuildPersonNextHint === "function" ? orionBuildPersonNextHint(rel, p.id) : "";
+    return `<article class="orion-person" style="--person-accent:${p.color}" title="${nextHint}">
+      <div class="orion-person-head"><strong>${p.icon} ${p.name}</strong><span class="orion-stage-pill" style="--stage-color:${stage.color}">${stage.label}</span></div>
+      <small>${p.role} · ♥${rel.affection}/14 · 亲密${rel.intimacy}${clearTag}</small>
+      <small class="orion-person-stats">H ${rel.scenes.length}/${orionAdultScenes[p.id].length} · 故事 ${rel.story}/${orionStorylines[p.id].length}${(rel.kinks?.length) ? ` · 玩法${rel.kinks.length}` : ""}</small>
+      ${nextHint ? `<p class="orion-person-tip">${nextHint}</p>` : ""}
       <div class="gal-mini-bar"><div class="gal-mini-fill" style="width:${rel.affection * 10}%"></div></div>
     </article>`;
   }).join("");
 
-  orionEls.orion_inventory.innerHTML = orionState.inventory.length
-    ? orionState.inventory.map((n) => `<span class="orion-tag">${n}</span>`).join("")
-    : `<span class="orion-tag muted">空</span>`;
+  if (typeof orionBuildInventoryHtml === "function") {
+    orionEls.orion_inventory.innerHTML = orionBuildInventoryHtml();
+  } else {
+    orionEls.orion_inventory.innerHTML = orionState.inventory.length
+      ? orionState.inventory.map((n) => `<span class="orion-tag">${n}</span>`).join("")
+      : `<span class="orion-tag muted">空</span>`;
+  }
   orionEls.orion_traits.innerHTML = orionState.traits.map((t) =>
     `<article class="orion-trait"><strong>${t.name}</strong><small>${t.desc}</small></article>`
   ).join("");
@@ -1065,6 +1079,7 @@ function orionRenderInner(logText = "") {
     : `<small class="muted">尚无 H 可回看</small>`;
 
   orionBindChoiceButtons(orionGetChoices(e));
+  orionFinishRenderUI(e);
   orionSaveRun();
 }
 
@@ -1087,4 +1102,5 @@ function initOrionGame() {
     const btn = ev.target.closest(".orion-gallery-btn");
     if (btn) orionOpenGalleryScene(btn.dataset.p, btn.dataset.s);
   });
+  if (typeof orionInitOrionUI === "function") orionInitOrionUI();
 }

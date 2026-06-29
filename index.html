@@ -209,28 +209,32 @@
     <!-- 色情 Galgame · Orion 式 Roguelike -->
     <section id="screen-gal-orion" class="screen orion-screen">
       <header class="orion-topbar glass">
-        <div>
-          <p class="orion-kicker">第 <span id="orion-week">1</span> 周 / 12 · 第 <span id="orion-day">1</span> 天 · <span id="orion-weather">晴</span></p>
+        <div class="orion-topbar-copy">
+          <p class="orion-kicker">第 <span id="orion-week">1</span> 周 / 24 · 第 <span id="orion-day">1</span> 天 · <span id="orion-weather">晴</span></p>
           <h2 class="orion-title">青藤大学 · 肉欲夜行</h2>
         </div>
         <div class="orion-top-actions">
-          <button type="button" id="btn-orion-save" class="btn-ghost-sm">保存</button>
-          <button type="button" id="btn-orion-new" class="btn-ghost-sm">重开</button>
-          <button type="button" id="btn-orion-back" class="btn-ghost-sm">返回</button>
+          <button type="button" id="btn-orion-guide" class="btn-ghost-sm orion-btn-guide" title="打开攻略指南">指南</button>
+          <button type="button" id="btn-orion-save" class="btn-ghost-sm" title="保存进度">保存</button>
+          <button type="button" id="btn-orion-new" class="btn-ghost-sm" title="重开本学期">重开</button>
+          <button type="button" id="btn-orion-back" class="btn-ghost-sm" title="返回大厅">返回</button>
         </div>
       </header>
-      <section class="orion-stats" aria-label="状态">
-        <div class="orion-meter"><span>体力</span><strong id="orion-energy">8</strong></div>
-        <div class="orion-meter"><span>欲压</span><strong id="orion-stress">2</strong></div>
-        <div class="orion-meter"><span>学业</span><strong id="orion-study">5</strong></div>
-        <div class="orion-meter"><span>魅力</span><strong id="orion-charm">3</strong></div>
-        <div class="orion-meter"><span>信任</span><strong id="orion-trust">1</strong></div>
-        <div class="orion-meter"><span>金钱</span><strong id="orion-money">6</strong></div>
-        <div class="orion-meter"><span>性奋</span><strong id="orion-spark">0</strong></div>
+      <div id="orion-progress-strip" class="orion-progress-strip" aria-label="学期进度"></div>
+      <section class="orion-stats" id="orion-stats" aria-label="状态">
+        <div class="orion-meter" data-stat="energy"><span>⚡ 体力</span><strong id="orion-energy">8</strong></div>
+        <div class="orion-meter" data-stat="stress"><span>🔥 欲压</span><strong id="orion-stress">2</strong></div>
+        <div class="orion-meter" data-stat="study"><span>📚 学业</span><strong id="orion-study">5</strong></div>
+        <div class="orion-meter" data-stat="charm"><span>✨ 魅力</span><strong id="orion-charm">3</strong></div>
+        <div class="orion-meter" data-stat="trust"><span>🤝 信任</span><strong id="orion-trust">1</strong></div>
+        <div class="orion-meter" data-stat="money"><span>💰 金钱</span><strong id="orion-money">6</strong></div>
+        <div class="orion-meter" data-stat="spark"><span>💗 性奋</span><strong id="orion-spark">0</strong></div>
       </section>
+      <div id="orion-hint-bar" class="orion-hint-bar hidden" role="status" aria-live="polite"></div>
+      <div id="orion-guide-panel" class="orion-guide-panel glass hidden" aria-label="攻略指南"></div>
       <section class="orion-layout">
         <aside class="orion-panel glass">
-          <h3>关系</h3>
+          <h3>关系 <small class="orion-panel-tip">悬停看下一步建议</small></h3>
           <div id="orion-relationships" class="orion-rel-list"></div>
           <h3>背包</h3>
           <div id="orion-inventory" class="orion-tags"></div>
@@ -240,9 +244,12 @@
           <div id="orion-gallery" class="orion-gallery"></div>
         </aside>
         <section class="orion-scene glass" id="orion-scene-panel">
-          <p id="orion-location" class="orion-kicker">校园</p>
-          <h3 id="orion-scene-title">开学</h3>
+          <header class="orion-scene-head">
+            <span id="orion-location" class="orion-location-badge">校园</span>
+            <h3 id="orion-scene-title">开学</h3>
+          </header>
           <article id="orion-scene-text" class="orion-scene-text" aria-live="polite"></article>
+          <p class="orion-choices-label">选择行动</p>
           <div id="orion-choices" class="orion-choices"></div>
           <p id="orion-log" class="orion-log"></p>
         </section>
@@ -673,6 +680,7 @@
   <script src="galgame-orion-fantasies.js"></script>
   <script src="galgame-orion-expand.js"></script>
   <script src="galgame-orion-flow.js"></script>
+  <script src="galgame-orion-ui.js"></script>
   <script src="galgame-orion.js"></script>
   <script src="galgame.js"></script>
   <script src="profile.js"></script>
