@@ -52,17 +52,19 @@ const ORION_CHARACTER_STRATEGIES = {
 };
 
 function orionGetRelationStage(rel) {
+  const stages = ORION_RELATION_STAGES || [{ id: "stranger", min: 0, label: "陌生", hint: "", color: "#6b7280" }];
   const aff = rel?.affection ?? 0;
-  let stage = ORION_RELATION_STAGES[0];
-  for (const s of ORION_RELATION_STAGES) {
+  let stage = stages[0];
+  for (const s of stages) {
     if (aff >= s.min) stage = s;
   }
   return stage;
 }
 
 function orionGetStrategyDefs(person) {
-  const char = ORION_CHARACTER_STRATEGIES[person.id] || [];
-  return [...char, ...ORION_UNIVERSAL_STRATEGIES];
+  const char = (typeof ORION_CHARACTER_STRATEGIES !== "undefined" && ORION_CHARACTER_STRATEGIES[person.id]) || [];
+  const universal = typeof ORION_UNIVERSAL_STRATEGIES !== "undefined" ? ORION_UNIVERSAL_STRATEGIES : [];
+  return [...char, ...universal];
 }
 
 function orionStrategyAvailable(def, person, rel) {

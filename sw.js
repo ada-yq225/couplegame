@@ -1,4 +1,4 @@
-const CACHE = "miyu-v50";
+const CACHE = "miyu-v51";
 const ASSETS = [
   "./",
   "./index.html",
@@ -7,14 +7,6 @@ const ASSETS = [
   "./data.js",
   "./content-extra.js",
   "./fantasy-packs.js",
-  "./galgame-campus.js",
-  "./galgame-characters.js",
-  "./galgame-wardrobe.js",
-  "./galgame-rogue.js",
-  "./galgame-orion-data.js",
-  "./galgame-orion-scenes.js",
-  "./galgame-orion.js",
-  "./galgame.js",
   "./challenges.js",
   "./scenes.js",
   "./scenes-extra.js",
@@ -24,12 +16,35 @@ const ASSETS = [
   "./profile.js",
   "./voice.js",
   "./sync.js",
+  "./galgame-campus.js",
+  "./galgame-characters.js",
+  "./galgame-wardrobe.js",
+  "./galgame-rogue.js",
+  "./galgame-orion-dialogue.js",
+  "./galgame-orion-immersion.js",
+  "./galgame-orion-erotica.js",
+  "./galgame-orion-strategy.js",
+  "./galgame-orion-playmodes.js",
+  "./galgame-orion-data.js",
+  "./galgame-orion-scenes.js",
+  "./galgame-orion-fantasies.js",
+  "./galgame-orion.js",
+  "./galgame.js",
+  "./vendor/peerjs.min.js",
   "./manifest.json",
   "./icon.svg",
 ];
 
+function isNetworkFirst(request) {
+  if (request.method !== "GET") return false;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return false;
+  const p = url.pathname;
+  return p.endsWith(".html") || p.endsWith(".js") || p.endsWith(".css") || p === "/" || p.endsWith("/");
+}
+
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS).catch(() => {})));
   self.skipWaiting();
 });
 
@@ -43,7 +58,19 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-  e.respondWith(
-    caches.match(e.request).then((cached) => cached || fetch(e.request))
-  );
+  if (isNetworkFirst(e.request)) {
+    e.respondWith(
+      fetch(e.request)
+        .then((res) => {
+          if (res.ok) {
+            const clone = res.clone();
+            caches.open(CACHE).then((c) => c.put(e.request, clone));
+          }
+          return res;
+        })
+        .catch(() => caches.match(e.request))
+    );
+    return;
+  }
+  e.respondWith(caches.match(e.request).then((cached) => cached || fetch(e.request)));
 });

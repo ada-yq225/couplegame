@@ -2040,6 +2040,9 @@ body.in-game .app {
   background: rgba(255, 77, 125, 0.08);
   color: var(--text);
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(255, 77, 125, 0.15);
+  user-select: none;
 }
 .orion-choice strong { display: block; font-size: 0.84rem; }
 .orion-choice small { display: block; font-size: 0.68rem; color: var(--text-dim); margin-top: 2px; }

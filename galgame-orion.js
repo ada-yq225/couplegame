@@ -428,21 +428,27 @@ function orionGetChoices(event) {
 
 function orionGetPersonChoices(event) {
   const person = orionPeople().find((p) => p.id === event.person);
+  if (!person) return orionGetCampusChoices(event);
   const rel = orionState.relationships[person.id];
-  const stage = orionGetRelationStage(rel);
-  const availStrats = orionGetStrategyDefs(person).filter((d) => orionStrategyAvailable(d, person, rel));
+  if (!rel) return orionGetCampusChoices(event);
+  const stage = typeof orionGetRelationStage === "function" ? orionGetRelationStage(rel) : { label: "陌生" };
+  const availStrats = typeof orionGetStrategyDefs === "function"
+    ? orionGetStrategyDefs(person).filter((d) => typeof orionStrategyAvailable === "function" && orionStrategyAvailable(d, person, rel))
+    : [];
   const choices = [
     { label: "🌙 单独约会", hint: "长对话 · 好感与性奋上升", run: () => orionDatePerson(person, rel) },
     { label: "💋 撩她", hint: "目光与指尖 · 魅力检定", run: () => orionFlirt(person, rel) },
     { label: "🫂 深夜谈心", hint: "欲望与底线说开", run: () => orionDeepTalk(person, rel) },
-    { label: `📖 攻略手册（${stage.label}）`, hint: `${availStrats.length} 招可用 · 专属手段`, run: () => orionOpenStrategyManual(person.id) },
+    ...(typeof orionOpenStrategyManual === "function" ? [{
+      label: `📖 攻略手册（${stage.label}）`, hint: `${availStrats.length} 招可用 · 专属手段`, run: () => orionOpenStrategyManual(person.id),
+    }] : []),
   ];
   if (availStrats.length) {
     const top = availStrats[0];
     choices.splice(3, 0, {
       label: `${top.icon} ${top.name}`,
       hint: top.hint,
-      run: () => orionExecuteStrategy(person, top.id),
+      run: () => { if (typeof orionExecuteStrategy === "function") orionExecuteStrategy(person, top.id); },
     });
   }
   if (rel.affection >= 3) {
@@ -450,11 +456,11 @@ function orionGetPersonChoices(event) {
     const edge = availStrats.find((d) => d.id === "edge" && d.id !== topId)
       || availStrats.find((d) => ["edge_sketch", "library_corner", "massage_ice"].includes(d.id) && d.id !== topId);
     if (edge) {
-      choices.push({ label: `🔥 ${edge.name}`, hint: edge.hint, run: () => orionExecuteStrategy(person, edge.id) });
+      choices.push({ label: `🔥 ${edge.name}`, hint: edge.hint, run: () => { if (typeof orionExecuteStrategy === "function") orionExecuteStrategy(person, edge.id); } });
     }
   }
   if (rel.affection >= 6 && !rel.clear) {
-    choices.push({ label: "💗 表白检定", hint: "信任+魅力 · 确认关系", run: () => orionExecuteStrategy(person, "confess") });
+    choices.push({ label: "💗 表白检定", hint: "信任+魅力 · 确认关系", run: () => { if (typeof orionExecuteStrategy === "function") orionExecuteStrategy(person, "confess"); } });
   }
   if (rel.affection >= 3) {
     choices.push({ label: "野战邀约", hint: "检定魅力，成功大幅好感", run: () => orionIntenseApproach(person, rel) });
@@ -889,27 +895,44 @@ function orionSyncWeekDisplay() {
   }
 }
 
+function orionBindChoiceButtons(choices) {
+  orionState._choices = choices;
+  if (!orionEls.orion_choices) return;
+  orionEls.orion_choices.innerHTML = choices.map((c, i) =>
+    `<button type="button" class="orion-choice" data-i="${i}"><strong>${c.label}</strong><small>${c.hint || ""}</small></button>`
+  ).join("");
+}
+
 function orionRender(logText = "") {
   if (!orionState) return;
+  try {
+    orionRenderInner(logText);
+  } catch (err) {
+    console.error("orionRender", err);
+    if (orionEls.orion_choices) {
+      orionBindChoiceButtons([
+        { label: "重试刷新", hint: "界面出错时点这里", run: () => orionRender(logText) },
+        { label: "返回大厅", hint: "安全退出", run: () => showScreen("hub") },
+      ]);
+    }
+    showToast?.("界面出错，请点重试或硬刷新", 3000);
+  }
+}
+
+function orionRenderInner(logText = "") {
   orionSyncWeekDisplay();
   if (orionState.sceneMode === "reward") {
     const e = orionState.current;
     if (orionState.pendingLogHtml) {
-    orionEls.orion_log.innerHTML = orionState.pendingLogHtml;
-    orionState.pendingLogHtml = null;
-  } else {
-    orionEls.orion_log.textContent = logText;
-  }
+      orionEls.orion_log.innerHTML = orionState.pendingLogHtml;
+      orionState.pendingLogHtml = null;
+    } else {
+      orionEls.orion_log.textContent = logText;
+    }
     orionEls.orion_location.textContent = e.location;
     orionEls.orion_scene_title.textContent = e.title;
     orionSetSceneContent({ html: false, text: e.text });
-    const choices = orionGetChoices(e);
-    orionEls.orion_choices.innerHTML = choices.map((c, i) =>
-      `<button type="button" class="orion-choice" data-i="${i}"><strong>${c.label}</strong><small>${c.hint || ""}</small></button>`
-    ).join("");
-    $$(".orion-choice").forEach((btn) => {
-      btn.addEventListener("click", () => choices[+btn.dataset.i].run());
-    });
+    orionBindChoiceButtons(orionGetChoices(e));
     orionSaveRun();
     return;
   }
@@ -969,17 +992,8 @@ function orionRender(logText = "") {
       `<button type="button" class="orion-gallery-btn ${filled ? "filled" : ""}" data-p="${p.id}" data-s="${sc.id}">${p.name}·${sc.title}</button>`
     ).join("")
     : `<small class="muted">尚无 H 可回看</small>`;
-  $$(".orion-gallery-btn").forEach((btn) => {
-    btn.addEventListener("click", () => orionOpenGalleryScene(btn.dataset.p, btn.dataset.s));
-  });
 
-  const choices = orionGetChoices(e);
-  orionEls.orion_choices.innerHTML = choices.map((c, i) =>
-    `<button type="button" class="orion-choice" data-i="${i}"><strong>${c.label}</strong><small>${c.hint || ""}</small></button>`
-  ).join("");
-  $$(".orion-choice").forEach((btn) => {
-    btn.addEventListener("click", () => choices[+btn.dataset.i].run());
-  });
+  orionBindChoiceButtons(orionGetChoices(e));
   orionSaveRun();
 }
 
@@ -989,4 +1003,17 @@ function initOrionGame() {
     if (confirm("重开本轮？当前进度将覆盖。")) { orionStartRun(); showScreen("galOrion"); }
   });
   $("#btn-orion-save")?.addEventListener("click", () => { orionSaveRun(); showToast?.("已保存", 1500); });
+
+  orionEls.orion_choices = $("#orion-choices");
+  orionEls.orion_choices?.addEventListener("click", (ev) => {
+    const btn = ev.target.closest(".orion-choice");
+    if (!btn || !orionState?._choices) return;
+    const choice = orionState._choices[+btn.dataset.i];
+    if (choice?.run) choice.run();
+  });
+
+  $("#orion-relationships")?.addEventListener("click", (ev) => {
+    const btn = ev.target.closest(".orion-gallery-btn");
+    if (btn) orionOpenGalleryScene(btn.dataset.p, btn.dataset.s);
+  });
 }

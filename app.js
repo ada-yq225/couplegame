@@ -1543,6 +1543,16 @@ $("#btn-new-setup").addEventListener("click", () => { showScreen("hub"); renderH
 $("#btn-install-help").addEventListener("click", () => $("#install-modal").classList.add("show"));
 $("#btn-close-modal").addEventListener("click", () => $("#install-modal").classList.remove("show"));
 
-if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js").then(() => {
+    navigator.serviceWorker.ready.then((reg) => reg.update());
+  }).catch(() => {});
+}
+window.addEventListener("error", (e) => {
+  console.error("[蜜语]", e.error || e.message);
+});
+window.addEventListener("unhandledrejection", (e) => {
+  console.error("[蜜语] promise", e.reason);
+});
 initGalgame();
 initOrionGame();
