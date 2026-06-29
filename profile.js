@@ -17,6 +17,7 @@ const defaultProfile = () => ({
   campaignClearsForSecret: 0,
   lastSceneId: "",
   lastEroticaId: "",
+  galgame: {},
   dailyLast: "",
   dailyDone: false,
   stats: { completed: 0, skipped: 0, bosses: 0, itemsUsed: 0 },

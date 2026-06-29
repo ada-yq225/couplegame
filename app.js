@@ -22,6 +22,9 @@ const screens = {
   welcome: $("#screen-welcome"), hub: $("#screen-hub"), sync: $("#screen-sync"),
   challengePick: $("#screen-challenge-pick"), scenePick: $("#screen-scene-pick"),
   eroticaPick: $("#screen-erotica-pick"), eroticaRead: $("#screen-erotica-read"),
+  galOrion: $("#screen-gal-orion"),
+  galCampus: $("#screen-gal-campus"),
+  galPick: $("#screen-gal-pick"), galPlay: $("#screen-gal-play"),
   freePick: $("#screen-free-pick"),
   chapter: $("#screen-chapter"), game: $("#screen-game"), chapterClear: $("#screen-chapter-clear"),
   end: $("#screen-end"), achievements: $("#screen-achievements"), editor: $("#screen-editor"),
@@ -1367,6 +1370,7 @@ $$(".hub-card").forEach((b) => b.addEventListener("click", () => {
   else if (m === "challenge") { renderChallengeList(); showScreen("challengePick"); }
   else if (m === "story") { renderSceneList(); showScreen("scenePick"); }
   else if (m === "erotica") { renderEroticaList(); showScreen("eroticaPick"); }
+  else if (m === "galgame") enterGalgame();
   else if (m === "midnight") startMidnightRush();
   else if (m === "free") { populateSceneSelect(); updateFreeSceneField(); showScreen("freePick"); }
   else if (m === "custom") startCustomGame();
@@ -1540,3 +1544,5 @@ $("#btn-install-help").addEventListener("click", () => $("#install-modal").class
 $("#btn-close-modal").addEventListener("click", () => $("#install-modal").classList.remove("show"));
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
+initGalgame();
+initOrionGame();

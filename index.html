@@ -62,6 +62,14 @@
       </div>
 
       <div class="hub-hero-group">
+        <button class="hub-card hub-hero hub-hero-gal" data-mode="galgame">
+          <span class="hub-icon">💋</span>
+          <span class="hub-hero-copy">
+            <span class="hub-hero-tag">攻略</span>
+            <strong>色情 Galgame</strong>
+            <small>Orion式6周校园 · 5女主 · 全露骨H · 换装姿势</small>
+          </span>
+        </button>
         <button class="hub-card hub-hero" data-mode="erotica">
           <span class="hub-icon">🔞</span>
           <span class="hub-hero-copy">
@@ -195,6 +203,158 @@
         </div>
         <div id="erotica-list" class="scene-list"></div>
         <button id="btn-erotica-pick-back" class="btn-ghost">返回大厅</button>
+      </div>
+    </section>
+
+    <!-- 色情 Galgame · Orion 式 Roguelike -->
+    <section id="screen-gal-orion" class="screen orion-screen">
+      <header class="orion-topbar glass">
+        <div>
+          <p class="orion-kicker">第 <span id="orion-week">1</span> 周 / 12 · 第 <span id="orion-day">1</span> 天 · <span id="orion-weather">晴</span></p>
+          <h2 class="orion-title">青藤大学 · 肉欲夜行</h2>
+        </div>
+        <div class="orion-top-actions">
+          <button type="button" id="btn-orion-save" class="btn-ghost-sm">保存</button>
+          <button type="button" id="btn-orion-new" class="btn-ghost-sm">重开</button>
+          <button type="button" id="btn-orion-back" class="btn-ghost-sm">返回</button>
+        </div>
+      </header>
+      <section class="orion-stats" aria-label="状态">
+        <div class="orion-meter"><span>体力</span><strong id="orion-energy">8</strong></div>
+        <div class="orion-meter"><span>欲压</span><strong id="orion-stress">2</strong></div>
+        <div class="orion-meter"><span>学业</span><strong id="orion-study">5</strong></div>
+        <div class="orion-meter"><span>魅力</span><strong id="orion-charm">3</strong></div>
+        <div class="orion-meter"><span>信任</span><strong id="orion-trust">1</strong></div>
+        <div class="orion-meter"><span>金钱</span><strong id="orion-money">6</strong></div>
+        <div class="orion-meter"><span>性奋</span><strong id="orion-spark">0</strong></div>
+      </section>
+      <section class="orion-layout">
+        <aside class="orion-panel glass">
+          <h3>关系</h3>
+          <div id="orion-relationships" class="orion-rel-list"></div>
+          <h3>背包</h3>
+          <div id="orion-inventory" class="orion-tags"></div>
+          <h3>特质</h3>
+          <div id="orion-traits" class="orion-trait-list"></div>
+          <h3>H 回看</h3>
+          <div id="orion-gallery" class="orion-gallery"></div>
+        </aside>
+        <section class="orion-scene glass" id="orion-scene-panel">
+          <p id="orion-location" class="orion-kicker">校园</p>
+          <h3 id="orion-scene-title">开学</h3>
+          <article id="orion-scene-text" class="orion-scene-text" aria-live="polite"></article>
+          <div id="orion-choices" class="orion-choices"></div>
+          <p id="orion-log" class="orion-log"></p>
+        </section>
+      </section>
+    </section>
+
+    <!-- 色情 Galgame · 校园地图（经典模式） -->
+    <section id="screen-gal-campus" class="screen gal-campus-screen">
+      <header class="gal-campus-header glass">
+        <div>
+          <h2 id="gal-campus-title">青藤大学</h2>
+          <p id="gal-campus-sub" class="pick-sub">校园攻略地图</p>
+          <div id="gal-run-hud" class="gal-run-hud hidden">
+            <span id="gal-run-week">第 1/12 周</span>
+            <span id="gal-run-energy">⚡⚡⚡</span>
+            <span id="gal-run-lust">欲 0</span>
+            <span id="gal-run-strip">还可脱 5 件</span>
+          </div>
+        </div>
+        <button id="btn-gal-campus-back" class="btn-ghost-sm">返回</button>
+      </header>
+      <div id="gal-campus-char" class="gal-campus-char surface"></div>
+      <div id="gal-campus-map" class="gal-campus-map"></div>
+      <footer class="gal-campus-footer">
+        <button id="btn-gal-wardrobe-open" class="btn-secondary">👗 换装</button>
+        <button id="btn-gal-end-week" class="btn-secondary">📅 结束本周</button>
+        <button id="btn-gal-campus-chars" class="btn-secondary">👤 换女主</button>
+        <button id="btn-gal-campus-story" class="btn-primary">📖 H剧情</button>
+      </footer>
+      <div id="gal-campus-modal" class="gal-campus-modal hidden">
+        <div class="gal-campus-modal-card glass">
+          <h3 id="gal-campus-modal-title">地点</h3>
+          <div id="gal-campus-modal-body"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 色情 Galgame · 选人 -->
+    <section id="screen-gal-pick" class="screen">
+      <div class="pick-card glass">
+        <h2>💋 选择攻略路线</h2>
+        <p class="pick-sub" id="gal-pick-sub">青藤大学 · 选择 TA 的校园身份。</p>
+        <div id="gal-list" class="scene-list"></div>
+        <button id="btn-gal-pick-back" class="btn-ghost">返回大厅</button>
+      </div>
+    </section>
+
+    <!-- 色情 Galgame · 攻略 -->
+    <section id="screen-gal-play" class="screen gal-screen">
+      <div class="gal-stage">
+        <div class="gal-stage-bg" id="gal-stage-bg"></div>
+        <div class="gal-portrait" id="gal-portrait">
+          <span class="gal-portrait-icon" id="gal-portrait-icon">💋</span>
+          <div class="gal-portrait-glow"></div>
+        </div>
+        <header class="gal-hud">
+          <div class="gal-hud-names">
+            <strong id="gal-char-title">TA</strong>
+            <em id="gal-char-tag">今夜只属于你</em>
+          </div>
+          <div class="gal-heart-wrap">
+            <div class="gal-heart-bar"><div id="gal-heart-fill" class="gal-heart-fill"></div></div>
+            <span id="gal-affection-num" class="gal-aff-num">♥ 0</span>
+          </div>
+          <p class="gal-hud-meta">
+            <span id="gal-scene-count">H 0/5</span>
+            <span id="gal-next-hint">约会攒好感解锁 H 场景</span>
+          </p>
+        </header>
+      </div>
+
+      <div class="gal-dialogue glass" id="gal-dialogue-box">
+        <p class="gal-speaker" id="gal-speaker">旁白</p>
+        <div class="gal-text" id="gal-text"></div>
+        <div class="gal-choices" id="gal-choices"></div>
+      </div>
+
+      <footer class="gal-toolbar" id="gal-toolbar">
+        <button type="button" id="btn-gal-date" class="btn-primary">💋 约会一轮</button>
+        <button type="button" id="btn-gal-hscene" class="btn-secondary hidden">🔞 H 场景</button>
+        <button type="button" id="btn-gal-play-back" class="btn-ghost">返回</button>
+      </footer>
+
+      <div id="gal-hscene-panel" class="gal-hscene hidden">
+        <header class="gal-h-header">
+          <button type="button" id="btn-gal-h-exit" class="btn-ghost gal-h-back">←</button>
+          <div class="gal-h-header-main">
+            <strong id="gal-h-title">H 场景</strong>
+            <em id="gal-h-stage">正酣</em>
+            <div class="gal-pleasure-bar"><div id="gal-pleasure-fill" class="gal-pleasure-fill"></div></div>
+          </div>
+        </header>
+        <article id="gal-h-body" class="gal-h-body erotica-narrative"></article>
+        <div id="gal-wardrobe-panel" class="gal-wardrobe-panel hidden">
+          <div id="gal-wardrobe-grid" class="gal-wardrobe-grid"></div>
+          <footer class="gal-wardrobe-footer">
+            <button type="button" id="btn-gal-wardrobe-strip" class="btn-ghost-sm">👗 再脱一件</button>
+            <button type="button" id="btn-gal-wardrobe-confirm" class="btn-primary">确认穿着 · 选姿势 →</button>
+          </footer>
+        </div>
+        <div id="gal-sex-positions" class="gal-sex-positions hidden"></div>
+        <div id="gal-sex-pace" class="gal-sex-pace hidden"></div>
+        <div id="gal-h-classic">
+          <div class="gal-h-action glass">
+            <span id="gal-h-action-label" class="gal-h-action-label">🃏 色牌</span>
+            <p id="gal-h-action"></p>
+          </div>
+          <footer class="gal-h-footer">
+            <button type="button" id="btn-gal-h-refresh" class="btn-ghost-sm">🔄 换一张色牌</button>
+            <button type="button" id="btn-gal-h-done" class="btn-primary">爽完了 · 完成场景</button>
+          </footer>
+        </div>
       </div>
     </section>
 
@@ -499,6 +659,16 @@
   <script src="erotica-extra.js"></script>
   <script src="erotica-extra-b.js"></script>
   <script src="fantasy-packs.js"></script>
+  <script src="galgame-campus.js"></script>
+  <script src="galgame-characters.js"></script>
+  <script src="galgame-wardrobe.js"></script>
+  <script src="galgame-rogue.js"></script>
+  <script src="galgame-orion-dialogue.js"></script>
+  <script src="galgame-orion-immersion.js"></script>
+  <script src="galgame-orion-data.js"></script>
+  <script src="galgame-orion-scenes.js"></script>
+  <script src="galgame-orion.js"></script>
+  <script src="galgame.js"></script>
   <script src="profile.js"></script>
   <script src="voice.js"></script>
   <script src="sync.js"></script>
