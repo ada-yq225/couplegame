@@ -395,7 +395,7 @@ function orionGetPersonChoices(event) {
   if (plays.length) {
     choices.push({
       label: `🎲 特殊玩法（${plays.length}）`,
-      hint: "电话/跳蛋/素股/口交/露出/束缚/足交/寸止…",
+      hint: "34+幻想：中出/打臀/宠物/随意用/灌满行走…",
       run: () => orionOpenPlayMenu(person.id),
     });
   }

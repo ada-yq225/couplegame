@@ -225,7 +225,7 @@ function orionOpenPlayMenu(personId) {
     person: personId,
     location: "特殊玩法",
     title: `怎么玩${person.name}`,
-    text: `今晚不限于正常做爱。选一种玩法——电话、跳蛋、素股、口交、露出、束缚、足交、乳交、寸止、晨炮……她身体能承受的，你都可以试。`,
+    text: `今晚不限于正常做爱。${typeof orionGetFantasyMenuBlurb === "function" ? orionGetFantasyMenuBlurb() : "选一种特殊玩法"}她身体能承受的，你都可以试到射。`,
     plays,
   };
   orionRender("");
