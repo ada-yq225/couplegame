@@ -373,6 +373,12 @@ function getEroticaIntensityForSection(sectionIndex, total) {
     "【试衣间】商场试衣间，帘子没拉严，外面有人也不能停手。",
     "【泳池派对】湿身贴贴，比基尼/泳裤边缘手指乱探。",
     "【惩罚游戏】{other}输了，今晚只能服从三条命令，不许讨价还价。",
+    "【师生补课】{self}当老师，{other}违纪，惩罚从跪姿升级到口舌侍奉。",
+    "【女王调教】{other}戴项圈跪好，{self}用口令控制节奏，错一次就停。",
+    "【私房摄影】{other}只穿衬衫，{self}拍到{other}湿透了才准停。",
+    "【酒吧一夜情】假装陌生人，十句以内必须把{other}带回房间。",
+    "【女总裁面试】{self}坐桌沿，{other}跪着「说服」你录用。",
+    "【吸血鬼喂食】{self}咬{other}锁骨，{other}用身体「喂饱」你。",
   );
   SCENARIO_PACKS.deep.roleplay.push(
     "【主仆之夜】{self}是主人，{other}跪候，口令错误就重来。",
@@ -381,6 +387,11 @@ function getEroticaIntensityForSection(sectionIndex, total) {
     "【陌生人游戏】蒙眼，假装对方是陌生人，重新「第一次」。",
     "【极限忍耐】安全词照旧，看谁能先把对方弄到求饶。",
     "【浴室蒸汽】镜雾了，只留下手印和喘气，做到镜再糊。",
+    "【法庭宣判】{self}穿法袍，{other}认罪，刑罚是当场被操到说不出话。",
+    "【特工审讯】{other}被绑椅，{self}用跨坐「刑讯」，招供就内射封口。",
+    "【新娘初夜】头纱不脱，{other}缚腕，{self}按洞房剧本做到礼成。",
+    "【偶像私教】只有{self}能看{other}彩排，镜前做到表情管理崩溃。",
+    "【救援队】{other}假装受伤，{self}的「治疗」是顶到{other}腿软。",
   );
   SCENARIO_PACKS.hot.dare.push(
     "三十秒内让{other}湿/硬到能感觉出来，做不到你脱光。",
