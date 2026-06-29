@@ -185,6 +185,20 @@
     });
   }
 
+  if (typeof ORION_RELATION_STAGES !== "undefined") {
+    const tierProse = {
+      stranger: "她还没把你当回事，但目光会在你经过时多停半秒。",
+      notice: "她开始记住你的名字，消息从「嗯」变成「在吗」。",
+      warm: "眼神和指尖试探，牵手会脸红，吻会发抖。",
+      ignite: "告白后心口发烫，拥抱会软，吻会湿。",
+      flesh: "身体认主前心先认主，缠绵比猛顶更让她颤。",
+      addict: "离不开你的温度，分离半天就像失恋。",
+    };
+    ORION_RELATION_STAGES.forEach((s) => {
+      if (tierProse[s.id] && !s.tip) s.hint = tierProse[s.id];
+    });
+  }
+
   if (typeof ORION_EXPLICIT_SCENE_BOOST !== "undefined") {
     Object.assign(ORION_EXPLICIT_SCENE_BOOST, {
       lintang: [

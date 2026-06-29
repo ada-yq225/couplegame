@@ -174,6 +174,15 @@ function orionBuildContextHint(event) {
       lines.push({ warn: false, text: `当前策略「${plan.name}」：${plan.style}` });
     }
   }
+  if (typeof orionIsPureLoveRoute === "function" && orionIsPureLoveRoute() && mode === "event") {
+    lines.push({ warn: false, text: "纯爱线：牵手散步 / 晚安吻 / 谈心推剧情；信任≥6 可开温柔 H" });
+  }
+  const stage = event?.person && orionState.relationships?.[event.person]
+    ? (typeof orionGetRelationStage === "function" ? orionGetRelationStage(orionState.relationships[event.person]) : null)
+    : null;
+  if (stage?.tip && mode === "event" && event?.person) {
+    lines.push({ warn: false, text: `【${stage.label}档】${stage.tip}` });
+  }
 
   if (mode === "map") {
     const mh = orionBuildMapHint();
@@ -199,12 +208,15 @@ function orionBuildContextHint(event) {
     const person = orionPeople().find((p) => p.id === event.person);
     const stage = typeof orionGetRelationStage === "function" ? orionGetRelationStage(rel) : null;
     if (stage) lines.push({ warn: false, text: `${person?.name}：${stage.label}（${stage.hint}）` });
-    if (rel.affection >= 5 && orionState.spark >= 1) lines.push({ warn: false, text: "✓ 已满足开 H 条件，可点「带她去做」" });
+    const pure = typeof orionIsPureLoveRoute === "function" && orionIsPureLoveRoute();
+    const canH = rel.affection >= 5 && (orionState.spark >= 1 || (pure && orionState.trust >= 6));
+    if (canH) lines.push({ warn: false, text: pure ? "✓ 可点「温柔缠绵」— 纯爱 H 正文" : "✓ 已满足开 H 条件，可点「带她去做」" });
     else if (rel.affection < 5) lines.push({ warn: false, text: `开 H 还需好感 ${5 - rel.affection}（当前 ${rel.affection}/14）` });
+    else if (pure) lines.push({ warn: false, text: "纯爱开 H 还需信任≥6 或性奋≥1" });
     else lines.push({ warn: false, text: "性奋不足：约会/撩骚/边缘亲密/就地发挥可快速提升" });
     if (typeof orionCanAdvanceStory === "function" && orionCanAdvanceStory(event.person, rel)) {
-      const ch = orionStorylines[event.person][rel.story];
-      lines.push({ warn: false, text: `可推剧情：${ch?.[0] || "下一幕"}（耗 1 性奋）` });
+      const ch = (pure && ORION_PURE_STORYLINES?.[event.person]?.[rel.story]) || orionStorylines[event.person][rel.story];
+      lines.push({ warn: false, text: pure ? `可推纯爱剧情：${ch?.[0] || "下一幕"}（不耗性奋）` : `可推剧情：${ch?.[0] || "下一幕"}（耗 1 性奋）` });
     }
     const gift = orionState.inventory.find((n) => person?.likes?.includes(n));
     if (gift) lines.push({ warn: false, text: `背包有她喜欢的「${gift}」，送礼物选项会出现` });
@@ -238,6 +250,15 @@ function orionBuildContextHint(event) {
 }
 
 function orionBuildPersonNextHint(rel, personId) {
+  if (typeof orionIsPureLoveRoute === "function" && orionIsPureLoveRoute()) {
+    if (rel.affection < 2) return "纯爱：牵手散步 / 约会攒好感";
+    if (rel.affection < 5) return "纯爱：晚安吻 + 谈心堆信任";
+    if (orionState.trust < 5) return "纯爱：谈心推剧情，信任≥5 更顺";
+    if (rel.story < orionStorylines[personId].length) return "纯爱：推纯爱剧情（不耗性奋）";
+    if (!rel.clear) return "纯爱：表白确认关系";
+    if (rel.scenes.length < orionAdultScenes[personId].length) return "纯爱：温柔 H，缠绵正文";
+    return "纯爱：完美结局冲刺（信任≥8）";
+  }
   if (rel.affection < 2) return "建议：攻略手册 → 学术/甜食/运动等专属手段";
   if (rel.affection < 5) return "建议：约会+边缘亲密，好感 5 开 H";
   if (orionState.spark < 1) return "建议：撩骚或就地发挥，堆性奋";

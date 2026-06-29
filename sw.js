@@ -1,4 +1,4 @@
-const CACHE = "miyu-v56";
+const CACHE = "miyu-v57";
 const ASSETS = [
   "./",
   "./index.html",
@@ -29,6 +29,7 @@ const ASSETS = [
   "./galgame-orion-scenes.js",
   "./galgame-orion-fantasies.js",
   "./galgame-orion-erotica-expand.js",
+  "./galgame-orion-tiers-purelove.js",
   "./galgame-orion-expand.js",
   "./galgame-orion-flow.js",
   "./galgame-orion-ui.js",

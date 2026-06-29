@@ -105,7 +105,7 @@ function orionStartRun() {
     current: {
       location: "性癖罗盘",
       title: "这轮你想怎么被操/怎么操人？",
-      text: `选择${player}本轮偏好的色情张力。慢热、被征服、偷情、直球肉体，或多线肉欲——会影响好感、H解锁与事件权重。`,
+      text: `选择${player}本轮偏好的张力。纯爱羁绊、慢热淫荡、偷情刺激、肉体直球或多线肉欲——会影响好感、剧情风格与 H 描写。`,
     },
     ended: false,
     sexOutfit: {},
@@ -348,7 +348,7 @@ function orionOpenRouteMenu() {
   orionState.current = {
     location: "策略调整",
     title: "换打法",
-    text: "单线肉便器、后宫、夜游野战、礼物攻势或学业夹缝——随时可改。",
+    text: "纯爱慢热、单线加深、后宫、夜游野战、礼物攻势或学业夹缝——随时可改。",
   };
   orionRender("你重新规划接下来的淫行策略。");
 }
@@ -408,7 +408,7 @@ function orionGetChoices(event) {
   const mode = orionState.sceneMode;
   if (mode === "preference") return orionPreferenceProfiles.map((p) => ({
     label: p.name, hint: p.desc,
-    run: () => { orionState.preference = p.id; orionState.sceneMode = "route"; orionState.current = { location: "攻略策略", title: "怎么操这学期", text: "选单线、多线、夜游、礼物或学业夹缝。" }; orionRender(`已选性癖：${p.name}`); },
+    run: () => { orionState.preference = p.id; orionState.sceneMode = "route"; orionState.current = { location: "攻略策略", title: p.id === "purelove" ? "怎么爱这学期" : "怎么操这学期", text: p.id === "purelove" ? "选纯爱慢热，或其他路线计划。六档关系走扎实，心动先于肉欲。" : "选单线、多线、夜游、礼物、学业夹缝或纯爱慢热。" }; orionRender(`已选性癖：${p.name}`); },
   }));
   if (mode === "route") return orionRoutePlans.map((p) => ({
     label: p.name, hint: p.style,
