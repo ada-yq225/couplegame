@@ -1969,6 +1969,18 @@ body.in-game .app {
   color: var(--gold);
   margin-top: 0.5em;
 }
+.orion-play-list {
+  list-style: none;
+  padding: 0;
+  margin: 1em 0;
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+.orion-play-list li {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 77, 125, 0.1);
+}
+.orion-play-list strong { color: var(--rose-soft); }
 .orion-choice.adult-choice {
   border-color: rgba(255, 77, 125, 0.35);
   background: rgba(255, 77, 125, 0.12);

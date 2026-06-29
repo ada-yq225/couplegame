@@ -98,7 +98,7 @@ function orionStartRun() {
     traits: orionPickMany(orionTraitsPool, 3),
     inventory: orionPickMany(orionShopItems, 2).map((i) => i.name),
     relationships: Object.fromEntries(
-      orionPeople().map((p) => [p.id, { affection: 0, intimacy: 0, scenes: [], dates: 0, story: 0, clear: false }])
+      orionPeople().map((p) => [p.id, { affection: 0, intimacy: 0, scenes: [], dates: 0, story: 0, clear: false, kinks: [] }])
     ),
     current: {
       location: "性癖罗盘",
@@ -351,8 +351,10 @@ function orionGetChoices(event) {
     { label: "春梦", hint: "性奋 +3 魅力 +1", run: () => orionReward({ spark: 3, charm: 1 }, "梦里操过了，醒来更饿。") },
     { label: "坦白局", hint: "信任 +3", run: () => orionReward({ trust: 3 }, "把炮友关系说清楚，反而更色。") },
   ];
-  if (mode === "gallery") return [{ label: "返回", hint: "回校园", run: () => { orionState.sceneMode = orionState.galleryReturnMode || "event"; orionRender("退出回看。"); } }];
-  if (mode === "adult" || mode === "gallery") return orionGetAdultChoices(event);
+  if (mode === "gallery") return [{ label: "返回", hint: "回校园", run: () => { orionState.sceneMode = orionState.galleryReturnMode || "event"; orionRender(); } }];
+  if (mode === "playmenu") return orionGetPlayMenuChoices(event);
+  if (mode === "play") return orionGetPlaySceneChoices(event);
+  if (mode === "adult") return orionGetAdultChoices(event);
   if (mode === "event" && orionEventBeatsRemaining() > 0) {
     const next = orionState.current.beats[orionState.beatIndex || 0];
     return [{
@@ -388,6 +390,14 @@ function orionGetPersonChoices(event) {
   }
   if (rel.affection >= 5 && orionState.spark >= 1) {
     choices.push({ label: "🔞 带她去做", hint: "分阶段沉浸 H：靠近→脱衣→前戏→插入→高潮", run: () => orionOpenAdultScene(person.id) });
+  }
+  const plays = orionGetAvailablePlays(person);
+  if (plays.length) {
+    choices.push({
+      label: `🎲 特殊玩法（${plays.length}）`,
+      hint: "电话/跳蛋/素股/口交/露出/束缚/足交/寸止…",
+      run: () => orionOpenPlayMenu(person.id),
+    });
   }
   const giftIdx = orionState.inventory.findIndex((n) => person.likes.includes(n));
   if (giftIdx >= 0) {
@@ -436,7 +446,7 @@ function orionGetAdultChoices(scene) {
       run: () => { orionState.sexOutfit[person.id] = oid; orionRender(); },
     };
   });
-  const posChoices = Object.entries(GAL_SEX_POSITIONS).slice(0, 6).map(([id, pos]) => ({
+  const posChoices = Object.entries(GAL_SEX_POSITIONS).map(([id, pos]) => ({
     label: `${pos.icon} ${pos.label}`,
     hint: "体位决定抽插描写",
     run: () => { orionState.adultPosition = id; orionRender(); },
@@ -458,11 +468,17 @@ function orionGetAdultChoices(scene) {
     ];
   }
   if (phase.id === "foreplay") {
+    const extras = orionGetForeplayExtras().map((x) => ({
+      label: x.label,
+      hint: x.hint,
+      run: () => { orionState.hForeplay = x.key; orionState.hForeplayExtra = orionApplyForeplayExtra(x.key); orionRender(); },
+    }));
     return [
       ...posChoices,
-      { label: "🫦 手指探进去", hint: "先湿后硬", run: () => { orionState.hForeplay = "finger"; orionRender(); } },
-      { label: "👅 让她含住", hint: "口舌侍奉", run: () => { orionState.hForeplay = "oral"; orionRender(); } },
-      { label: "😈 只磨不進", hint: "吊到她求", run: () => { orionState.hForeplay = "tease"; orionRender(); } },
+      { label: "🫦 手指探进去", hint: "先湿后硬", run: () => { orionState.hForeplay = "finger"; orionState.hForeplayExtra = ""; orionRender(); } },
+      { label: "👅 让她含住", hint: "口舌侍奉", run: () => { orionState.hForeplay = "oral"; orionState.hForeplayExtra = ""; orionRender(); } },
+      { label: "😈 只磨不進", hint: "吊到她求", run: () => { orionState.hForeplay = "tease"; orionState.hForeplayExtra = ""; orionRender(); } },
+      ...extras,
       { label: "🔥 进入她", hint: "龟头抵住穴口", run: () => orionAdvanceHPhase() },
     ];
   }
@@ -474,6 +490,20 @@ function orionGetAdultChoices(scene) {
       { label: "💦 推向高潮", hint: "她快哭了", run: () => orionAdvanceHPhase() },
     ];
   }
+  const finishExtras = orionGetFinishExtras(person.id).map((x) => ({
+    label: x.label,
+    hint: x.hint,
+    run: () => {
+      orionState.hFinish = x.key;
+      const extra = orionApplyFinishExtra(x.key);
+      const stats = x.key === "round2"
+        ? { energy: -4, stress: 0, affection: 3, intimacy: 2, spark: -1 }
+        : x.key === "squirt"
+          ? { energy: -3, stress: -1, affection: 3, intimacy: 2, spark: -2 }
+          : { energy: -3, stress: -1, affection: 2, intimacy: 2, spark: -1 };
+      orionCompleteAdultScene(scene, rel, stats, `${scene.after}\n\n${extra}`, person.id);
+    },
+  }));
   return [
     {
       label: "🩸 内射灌满",
@@ -500,7 +530,38 @@ function orionGetAdultChoices(scene) {
         orionCompleteAdultScene(scene, rel, { energy: -2, stress, affection: 3, intimacy: 1 }, `${scene.after}\n\n${ORION_FINISH_FLAVOR.afterglow}`, person.id);
       },
     },
+    ...finishExtras,
     { label: "离开", hint: "暂不结束", run: () => orionDrawRandomEvent("") },
+  ];
+}
+
+function orionGetPlayMenuChoices(event) {
+  const person = orionPeople().find((p) => p.id === event.person);
+  const plays = event.plays || orionGetAvailablePlays(person);
+  return plays.map((play) => ({
+    label: `${play.icon} ${play.name}`,
+    hint: play.hint,
+    run: () => orionStartPlay(person.id, play.id),
+  })).concat([
+    { label: "返回", hint: "普通选项", run: () => { orionState.sceneMode = "event"; orionRender(); } },
+  ]);
+}
+
+function orionGetPlaySceneChoices(event) {
+  const person = orionPeople().find((p) => p.id === event.person);
+  const rel = orionState.relationships[person.id];
+  const playId = orionState.playId;
+  if (playId === "dirty_talk") {
+    return [
+      { label: "🗣️ 说最骚的话", hint: "魅力检定", run: () => orionRunDirtyTalkCheck(person, rel) },
+      { label: "🔞 直接开操", hint: "转入正式 H", run: () => orionOpenAdultScene(person.id) },
+      { label: "停下", hint: "离开", run: () => { orionState.sceneMode = "event"; orionDrawRandomEvent(""); } },
+    ];
+  }
+  return [
+    { label: "💦 做到射/高潮", hint: "完成本玩法", run: () => orionCompletePlay(person.id, playId) },
+    { label: "🔞 转入正式做爱", hint: "分阶段 H", run: () => orionOpenAdultScene(person.id) },
+    { label: "停下", hint: "忍住了", run: () => { orionState.sceneMode = "event"; orionDrawRandomEvent(""); } },
   ];
 }
 
@@ -715,6 +776,12 @@ function orionBuildSceneContent(event) {
   if (["preference", "route", "shop", "map", "exam", "reward"].includes(orionState.sceneMode)) {
     return { html: false, text: event.text };
   }
+  if (orionState.sceneMode === "playmenu") {
+    return { html: true, text: orionBuildPlayMenuHtml(event) };
+  }
+  if (orionState.sceneMode === "play") {
+    return { html: true, text: orionBuildPlayHtml(event) };
+  }
   if (orionState.sceneMode === "adult" || orionState.sceneMode === "gallery") {
     return { html: true, text: orionBuildHPhaseHtml(event) };
   }
@@ -788,14 +855,17 @@ function orionRender(logText = "") {
   const isAdult = orionState.sceneMode === "adult" || orionState.sceneMode === "gallery";
   orionSetSceneContent(orionBuildSceneContent(e));
   orionEls.orion_scene_text.classList.toggle("orion-adult-text", isAdult);
-  orionApplyMoodToScreen(orionState.sceneMode, e.person);
+  orionApplyMoodToScreen(
+    ["adult", "gallery", "play", "playmenu"].includes(orionState.sceneMode) ? "adult" : orionState.sceneMode,
+    e.person
+  );
 
   orionEls.orion_relationships.innerHTML = orionPeople().map((p) => {
     const rel = orionState.relationships[p.id];
     return `<article class="orion-person" style="--person-accent:${p.color}">
       <div class="orion-person-head"><strong>${p.icon} ${p.name}</strong><span>${rel.affection}/14 · 亲密${rel.intimacy}</span></div>
       <small>${p.role}</small>
-      <small>H ${rel.scenes.length}/${orionAdultScenes[p.id].length} · 故事 ${rel.story}/${orionStorylines[p.id].length}</small>
+      <small>H ${rel.scenes.length}/${orionAdultScenes[p.id].length} · 故事 ${rel.story}/${orionStorylines[p.id].length}${(rel.kinks?.length) ? ` · 玩法${rel.kinks.length}` : ""}</small>
       <div class="gal-mini-bar"><div class="gal-mini-fill" style="width:${rel.affection * 10}%"></div></div>
     </article>`;
   }).join("");

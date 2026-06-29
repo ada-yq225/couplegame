@@ -52,6 +52,11 @@ const orionShopItems = [
   { name: "按摩油", cost: 3, tags: ["shenman", "sutang"], text: "滑得站不住。" },
   { name: "拍立得", cost: 4, tags: ["baiyue", "sutang"], text: "留下不能删的证据。" },
   { name: "暖宝宝", cost: 1, tags: ["lintang", "baiyue"], text: "冬天也要脱光。" },
+  { name: "肛门塞", cost: 4, tags: ["sutang", "shenman", "baiyue"], text: "尾巴晃给外面看不见的地方。" },
+  { name: "口球", cost: 3, tags: ["shenman", "baiyue"], text: "只能哼，不能喊。" },
+  { name: "低温蜡烛", cost: 3, tags: ["shenman", "baiyue"], text: "滴在乳尖会弓背。" },
+  { name: "润滑凝胶", cost: 2, tags: ["guye", "sutang", "lintang", "shenman", "baiyue"], text: "后面也能顺利。" },
+  { name: "乳夹", cost: 3, tags: ["shenman", "baiyue", "lintang"], text: "夹上就不许摘。" },
 ];
 
 const orionLocations = [

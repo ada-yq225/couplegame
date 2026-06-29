@@ -130,6 +130,7 @@ function orionInitHScene(scene) {
   orionState.hPhase = 0;
   orionState.hApproach = "near";
   orionState.hForeplay = "finger";
+  orionState.hForeplayExtra = "";
   orionState.hPace = "hard";
   orionState.hFinish = null;
   orionState.adultPosition = orionState.adultPosition || "missionary";
@@ -192,7 +193,7 @@ function orionBuildHPhaseHtml(event) {
   }
 
   if (phase.id === "foreplay") {
-    const fp = ORION_FOREPLAY_FLAVOR[orionState.hForeplay || "finger"];
+    const fp = orionState.hForeplayExtra || ORION_FOREPLAY_FLAVOR[orionState.hForeplay || "finger"];
     html += orionFormatStage("前戏", orionFormatParagraphs(fp));
     const bodySex = heroine ? getBodyFlavor(heroine.bodyType, "sex") : "";
     if (bodySex) html += orionFormatParagraphs(bodySex);
