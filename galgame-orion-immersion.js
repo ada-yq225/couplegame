@@ -84,7 +84,8 @@ function orionEscapeHtml(s) {
 function orionPickSense(weather, place) {
   const pool = ORION_SENSE_BY_WEATHER[weather] || ORION_SENSE_BY_WEATHER.晴;
   const w = galPick(pool);
-  const p = ORION_PLACE_SENSE[place] || ORION_PLACE_SENSE.H场景;
+  const locExtra = window.ORION_LOCATION_FLAVOR?.[place];
+  const p = locExtra || ORION_PLACE_SENSE[place] || ORION_PLACE_SENSE.H场景;
   return `${p}\n${w}`;
 }
 

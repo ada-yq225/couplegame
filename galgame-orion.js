@@ -153,6 +153,10 @@ function orionDrawRandomEvent(logText = "") {
     orionOpenDayHook(2, logText);
     return;
   }
+  if (orionState.day === 3 && Math.random() < 0.4) {
+    orionOpenDayHook(3, logText);
+    return;
+  }
   if (orionState.day === 4 && Math.random() < 0.55) {
     orionOpenMidWeekEvent(logText);
     return;
@@ -281,7 +285,7 @@ function orionOpenMap() {
   orionState.current = {
     location: "校园地图",
     title: "今晚去哪猎艳",
-    text: "主动选地点更容易遇见对应的人，也会改变体力、性奋和欲压。",
+    text: `主动选地点（共 ${orionLocations.length} 处）更容易邂逅对应女主，高好感地点可「就地发挥」加成。`,
   };
   orionRender("你打开地图，规划今晚的淫行路线。");
 }
@@ -476,7 +480,7 @@ function orionGetPersonChoices(event) {
   if (plays.length) {
     choices.push({
       label: `🎲 特殊玩法（${plays.length}）`,
-      hint: "34+幻想：中出/打臀/宠物/随意用/灌满行走…",
+      hint: "42+幻想：脱衣扑克/共浴/镜前/课上遥控…",
       run: () => orionOpenPlayMenu(person.id),
     });
   }
@@ -485,8 +489,17 @@ function orionGetPersonChoices(event) {
     const item = orionShopItems.find((i) => i.name === orionState.inventory[giftIdx]);
     choices.push({ label: `送${orionState.inventory[giftIdx]}`, hint: "好感爆发", run: () => orionGiveGift(person, rel, item, giftIdx) });
   }
+  const locName = orionState.current?.location;
+  const locMatch = locName && orionLocations.find((l) => l.name === locName);
+  if (locMatch) {
+    choices.push({
+      label: `📍 就地发挥（${locName}）`,
+      hint: "地点加成 · 性奋+1",
+      run: () => orionLocationDeepPlay(person, rel, locMatch),
+    });
+  }
   choices.push(
-    { label: "校园地图", hint: "选地点", run: () => orionOpenMap() },
+    { label: "校园地图", hint: `${orionLocations.length}处可猎艳`, run: () => orionOpenMap() },
     { label: "情趣店", hint: "买礼物", run: () => orionOpenShop() },
     { label: "换策略", hint: "调整路线", run: () => orionOpenRouteMenu() },
     { label: "跳过", hint: "省体力", run: () => orionApplyChoice({ energy: -1 }, `没理${person.name}，但省了点力气。`) }
@@ -496,7 +509,7 @@ function orionGetPersonChoices(event) {
 
 function orionGetCampusChoices() {
   return [
-    { label: "校园地图", hint: "选地点猎艳", run: () => orionOpenMap() },
+    { label: "校园地图", hint: `${orionLocations.length}处可猎艳`, run: () => orionOpenMap() },
     { label: "情趣便利店", hint: "购物", run: () => orionOpenShop() },
     { label: "自习", hint: "学业 +2 体力 -1", run: () => orionApplyChoice({ study: 2, energy: -1 }, "假装学习，其实在想昨晚。") },
     { label: "换策略", hint: "调整", run: () => orionOpenRouteMenu() },
@@ -731,18 +744,53 @@ function orionGiveGift(person, rel, item, index) {
   orionApplyChoice({ stress: -1 }, `${person.name} 接过${item.name}，眼神立刻不一样了。`, person.id);
 }
 
+function orionLocationDeepPlay(person, rel, loc) {
+  const bonus = (loc.spark ? 2 : 1) + (orionPreferenceMatches(person.id) ? 1 : 0);
+  rel.affection = orionClamp(rel.affection + 1, 0, 14);
+  orionState.spark = orionClamp(orionState.spark + bonus, 0, 14);
+  const flavor = window.ORION_LOCATION_FLAVOR?.[loc.name] || `${loc.name}的空气又热又稠。`;
+  const extra = galFill(orionPickDialogue(person.id, rel.affection >= 5 ? "approach_ok" : "flirt_ok", rel.dates + orionD6()));
+  orionState.pendingLogHtml = orionWrapDateImmersive(person, rel, `${flavor}\n\n【就地发挥】\n${extra}`) + `<p class="orion-log-meta">地点加成 · 性奋+${bonus}</p>`;
+  orionApplyChoice({ energy: -1, stress: loc.stress > 0 ? 1 : 0 }, "", person.id);
+}
+
 function orionVisitLocation(loc) {
   for (const k of ["energy", "stress", "study", "charm", "trust", "money", "spark"]) {
     if (loc[k]) orionState[k] = orionClamp(orionState[k] + loc[k], 0, 14);
   }
-  const candidates = orionPeople().filter((p) => loc.tags.some((t) => p.name === t || p.role.includes(t) || p.id === t));
-  if (candidates.length && Math.random() < 0.78) {
+  const candidates = orionPeople().filter((p) => loc.tags.some((t) => p.id === t || p.name === t || p.role.includes(t)));
+  const meetChance = 0.55 + (orionHasTrait("rumor") ? 0.1 : 0) + (candidates.length ? 0.15 : 0);
+  if (candidates.length && Math.random() < meetChance) {
     const person = candidates[Math.floor(Math.random() * candidates.length)];
-    orionState.relationships[person.id].affection += 1;
-    orionApplyChoice({ energy: -1 }, `在${loc.name}遇见${person.name}，自然更近一步。`, person.id);
-  } else {
-    orionApplyChoice({ energy: -1 }, `在${loc.name}晃了一夜。`, null);
+    const rel = orionState.relationships[person.id];
+    const affGain = 1 + (orionPreferenceMatches(person.id) ? 1 : 0);
+    rel.affection = orionClamp(rel.affection + affGain, 0, 14);
+    orionState.spark = orionClamp(orionState.spark + (loc.spark ? 1 : 0), 0, 14);
+    orionState.sceneMode = "event";
+    orionState.beatIndex = 0;
+    const flavor = window.ORION_LOCATION_FLAVOR?.[loc.name] || `在${loc.name}，空气里都是暧昧。`;
+    orionState.current = {
+      type: "person",
+      person: person.id,
+      location: loc.name,
+      title: `${person.name} · ${loc.name}`,
+      text: `${flavor}\n\n${orionBuildDateText(person, rel)}`,
+      tags: loc.tags || [],
+      beats: rel.affection >= 3 ? [
+        { speaker: person.name, text: galFill(orionPickDialogue(person.id, "flirt_ok", rel.dates)) },
+        { speaker: "旁白", text: "她看你的眼神，像已经选好下一步要做什么。" },
+      ] : null,
+    };
+    if (orionState.streakPerson === person.id) orionState.streak += 1;
+    else { orionState.streakPerson = person.id; orionState.streak = 1; }
+    orionState.energy = orionClamp(orionState.energy - 1, 0, 14);
+    orionNextDay();
+    orionState.pendingLogHtml = orionWrapDateImmersive(person, rel, `在${loc.name}遇见${person.name}，好感+${affGain}`) + `<p class="orion-log-meta">地点邂逅 · 可就地发挥/约会/攻略</p>`;
+    orionSaveRun();
+    orionRender("");
+    return;
   }
+  orionApplyChoice({ energy: -1 }, `在${loc.name}晃了一夜。${window.ORION_LOCATION_FLAVOR?.[loc.name] || ""}`, null);
 }
 
 function orionGetShopChoices(event) {
