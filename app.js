@@ -26,6 +26,7 @@ const screens = {
   galCampus: $("#screen-gal-campus"),
   galPick: $("#screen-gal-pick"), galPlay: $("#screen-gal-play"),
   freePick: $("#screen-free-pick"),
+  poker: $("#screen-poker"),
   chapter: $("#screen-chapter"), game: $("#screen-game"), chapterClear: $("#screen-chapter-clear"),
   end: $("#screen-end"), achievements: $("#screen-achievements"), editor: $("#screen-editor"),
 };
@@ -979,20 +980,25 @@ function getScenePeakIntensity(scene) {
 
 function renderEroticaList() {
   const catFilter = document.querySelector('input[name="erotica-cat-filter"]:checked')?.value || "all";
-  const list = getEroticaList().filter((s) => catFilter === "all" || (s.category || "indoor") === catFilter);
+  const list = getEroticaList()
+    .filter((s) => catFilter === "all" || (s.category || "indoor") === catFilter)
+    .sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
   const last = profile.lastEroticaId;
   $("#erotica-list").innerHTML = list.length ? list.map((s) => {
     const secs = s.sections?.length || 5;
     const cat = SCENE_CATEGORY_LABELS?.[s.category || "indoor"] || "";
     const lastTag = last === s.id ? '<span class="scene-last">上次读过</span>' : "";
-    return `<button class="scene-card erotica-card" data-id="${s.id}" style="--scene-accent:${s.color || "#d4567a"}">
+    const featTag = s.featured ? '<span class="scene-featured">重点篇</span>' : "";
+    const desc = s.desc || (s.featured ? "完整牌局节奏 · 旁注规则 · 边打边做" : null)
+      || getScene?.(s.id)?.desc || "沉浸式情色叙事，边读边做。";
+    return `<button class="scene-card erotica-card${s.featured ? " erotica-featured" : ""}" data-id="${s.id}" style="--scene-accent:${s.color || "#d4567a"}">
       <span class="scene-icon">${s.icon}</span>
       <div class="scene-body">
         <strong>${s.name}</strong>
         <em>${s.tagline}</em>
-        <p>${s.desc || getScene?.(s.id)?.desc || "沉浸式情色叙事，边读边做。"}</p>
+        <p>${desc}</p>
         <span class="scene-meta">${cat} · ${secs} 幕 · 边读边做</span>
-        ${lastTag}
+        ${featTag}${lastTag}
       </div>
     </button>`;
   }).join("") : '<p class="scene-empty">没有符合筛选的故事。</p>';
@@ -1372,6 +1378,7 @@ $$(".hub-card").forEach((b) => b.addEventListener("click", () => {
   else if (m === "erotica") { renderEroticaList(); showScreen("eroticaPick"); }
   else if (m === "galgame") enterGalgame();
   else if (m === "midnight") startMidnightRush();
+  else if (m === "poker") { if (typeof pokerOpenSetup === "function") pokerOpenSetup(); else showToast("扑克模块加载中"); }
   else if (m === "free") { populateSceneSelect(); updateFreeSceneField(); showScreen("freePick"); }
   else if (m === "custom") startCustomGame();
 }));

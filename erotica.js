@@ -19,11 +19,104 @@ function fillEroticaText(text, selfName, otherName, nameA, nameB) {
     .replace(/\{B\}/g, nameB || "");
 }
 
+/** 把长文拆成短段，避免一整坨读不动（全场景通用） */
+function splitReadableParagraphs(text, maxLen) {
+  const limit = maxLen || 72;
+  if (!text) return [];
+  const raw = String(text)
+    .replace(/\r\n/g, "\n")
+    .replace(/\u00a0/g, " ")
+    .trim();
+  if (!raw) return [];
+
+  // 已有换行：优先按行拆（写作时短行 = 短段）
+  const blocks = raw
+    .split(/\n\s*\n+/)
+    .flatMap((b) => b.split(/\n+/))
+    .map((p) => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  const out = [];
+
+  const pushChunk = (chunk) => {
+    const t = chunk.trim();
+    if (t) out.push(t);
+  };
+
+  const splitByComma = (sent) => {
+    const parts = sent.split(/(?<=[，、])/);
+    let piece = "";
+    for (const part of parts) {
+      if (!part) continue;
+      if (!piece) piece = part;
+      else if (piece.length + part.length <= limit) piece += part;
+      else {
+        pushChunk(piece);
+        piece = part;
+      }
+    }
+    if (piece) pushChunk(piece);
+  };
+
+  for (const block of blocks) {
+    if (block.length <= limit) {
+      pushChunk(block);
+      continue;
+    }
+
+    // 保护中文引号对话，整段尽量不切断
+    const units = [];
+    let i = 0;
+    while (i < block.length) {
+      const ch = block[i];
+      if (ch === "「" || ch === "『" || ch === "“") {
+        const close = ch === "「" ? "」" : ch === "『" ? "』" : "”";
+        const end = block.indexOf(close, i + 1);
+        if (end !== -1) {
+          units.push(block.slice(i, end + 1));
+          i = end + 1;
+          continue;
+        }
+      }
+      // 普通：收到句末
+      let j = i;
+      while (j < block.length) {
+        const c = block[j];
+        if (c === "「" || c === "『" || c === "“") break;
+        j++;
+        if ("。！？…；".includes(block[j - 1])) break;
+      }
+      if (j === i) j = i + 1;
+      units.push(block.slice(i, j));
+      i = j;
+    }
+
+    let buf = "";
+    for (const unit of units) {
+      const u = unit.trim();
+      if (!u) continue;
+      if (u.length > limit) {
+        if (buf) {
+          pushChunk(buf);
+          buf = "";
+        }
+        splitByComma(u);
+        continue;
+      }
+      if (!buf) buf = u;
+      else if (buf.length + u.length <= limit) buf += u;
+      else {
+        pushChunk(buf);
+        buf = u;
+      }
+    }
+    if (buf) pushChunk(buf);
+  }
+  return out;
+}
+
 function formatEroticaNarrative(text) {
-  return text
-    .split(/\n\n+/)
-    .map((p) => p.trim())
-    .filter(Boolean)
+  return splitReadableParagraphs(text, 52)
     .map((p) => `<p>${p}</p>`)
     .join("");
 }

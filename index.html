@@ -67,7 +67,7 @@
           <span class="hub-hero-copy">
             <span class="hub-hero-tag">攻略</span>
             <strong>色情 Galgame</strong>
-            <small>24周四幕 · 30地图 · 17H/人 · 36+玩法</small>
+            <small>24周四幕 · 六阶H · 22H/人 · 更长更黄</small>
           </span>
         </button>
         <button class="hub-card hub-hero" data-mode="erotica">
@@ -75,7 +75,7 @@
           <span class="hub-hero-copy">
             <span class="hub-hero-tag">最色</span>
             <strong>情欲沉浸</strong>
-            <small>34 篇黄文 · 边读边湿 · 配套色牌直接开干</small>
+            <small>41 篇短段黄文 · 边读边做</small>
           </span>
         </button>
         <button class="hub-card hub-hero hub-hero-muted" data-mode="midnight">
@@ -83,6 +83,14 @@
           <span class="hub-hero-copy">
             <strong>深夜快闪</strong>
             <small>随机黄文 + 极限色牌 · 抽到就必须做</small>
+          </span>
+        </button>
+        <button class="hub-card hub-hero hub-hero-poker" data-mode="poker">
+          <span class="hub-icon">🃏</span>
+          <span class="hub-hero-copy">
+            <span class="hub-hero-tag">真牌局</span>
+            <strong>情侣德州</strong>
+            <small>无限注 · 色池 · 高潮任务 · 街间色戏</small>
           </span>
         </button>
       </div>
@@ -97,7 +105,7 @@
           <p id="secret-unlock-hint" class="secret-hint"></p>
           <button class="hub-card hub-row" data-mode="story">
             <span class="hub-icon">📖</span>
-            <span class="hub-row-copy"><strong>场景故事</strong><small>34 种剧情 · 四幕循序渐进</small></span>
+            <span class="hub-row-copy"><strong>场景故事</strong><small>34 种剧情 · 配 40 篇长黄文</small></span>
           </button>
         </div>
       </div>
@@ -184,6 +192,87 @@
         </div>
         <p id="sync-err" class="sync-err"></p>
         <button id="btn-sync-back" class="btn-ghost">返回大厅</button>
+      </div>
+    </section>
+
+    <!-- 情侣德州扑克 -->
+    <section id="screen-poker" class="screen poker-screen">
+      <div id="poker-setup" class="poker-setup glass">
+        <header class="poker-setup-head">
+          <p class="eyebrow">无限注 · 重色欲 · 轻脱衣</p>
+          <h2>🃏 情侣德州</h2>
+          <p class="poker-setup-desc">标准<strong>二人无限注德州</strong>：小盲/大盲、前注→翻牌→转牌→河牌、最小加注、全下与未叫注退还、摊牌比牌。同机轮流，屏幕会提示把手机给谁。赢了还能下色令。</p>
+        </header>
+        <ul class="poker-rules">
+          <li><strong>真实规则</strong> — 弃牌/过牌/跟注/加注/全下 · 半池/满池快捷 · 盲注升级</li>
+          <li><strong>HU 顺序</strong> — 前注庄家(SB)先动；翻后大盲先动</li>
+          <li><strong>全下</strong> — 自动发完公共牌 · 多下的注退还</li>
+          <li><strong>色池 + 街间色戏 + 任务</strong> — 牌局外的情欲层</li>
+          <li><strong>赢牌</strong> — 色令档位 / 体位 / 高潮任务（脱衣很少）</li>
+        </ul>
+        <div class="poker-mode-grid">
+          <button type="button" id="btn-poker-start-soft" class="poker-mode-btn">
+            <strong>调情局</strong>
+            <small>600 筹 · 接吻爱抚 · 热身</small>
+          </button>
+          <button type="button" id="btn-poker-start-hot" class="poker-mode-btn poker-mode-hot">
+            <strong>情欲局</strong>
+            <small>500 筹 · 色池+街戏 · 推荐</small>
+          </button>
+          <button type="button" id="btn-poker-start-deep" class="poker-mode-btn poker-mode-deep">
+            <strong>痴迷局</strong>
+            <small>400 筹 · 高潮/插入任务</small>
+          </button>
+        </div>
+        <button type="button" id="btn-poker-back" class="btn-ghost">返回大厅</button>
+      </div>
+
+      <div id="poker-table-wrap" class="poker-table-wrap hidden">
+        <header class="poker-table-bar">
+          <button type="button" id="btn-poker-table-exit" class="btn-ghost-sm">离开</button>
+          <p id="poker-hand-meta" class="poker-hand-meta">第 1 手</p>
+          <p class="poker-pot-wrap">底池 <strong id="poker-pot">0</strong></p>
+        </header>
+        <p id="poker-mission" class="poker-mission"></p>
+
+        <div class="poker-felt">
+          <div class="poker-seat poker-seat-top" id="poker-seat-1">
+            <div class="pk-seat-meta">
+              <span class="pk-name">玩家B</span>
+              <span class="pk-chips">0</span>
+              <span class="pk-bet"></span>
+              <span class="pk-status"></span>
+            </div>
+            <div class="pk-clothes" title="衣物"></div>
+            <div class="pk-hole"></div>
+          </div>
+
+          <div id="poker-board" class="poker-board" aria-label="公共牌"></div>
+
+          <div class="poker-seat poker-seat-bot" id="poker-seat-0">
+            <div class="pk-hole"></div>
+            <div class="pk-clothes" title="衣物"></div>
+            <div class="pk-seat-meta">
+              <span class="pk-name">玩家A</span>
+              <span class="pk-chips">0</span>
+              <span class="pk-bet"></span>
+              <span class="pk-status"></span>
+            </div>
+          </div>
+        </div>
+
+        <div id="poker-log" class="poker-log" aria-live="polite"></div>
+        <div id="poker-actions" class="poker-actions"></div>
+        <div id="poker-resolve" class="poker-resolve hidden"></div>
+      </div>
+
+      <div id="poker-dare-modal" class="poker-dare-modal" role="dialog" aria-modal="true">
+        <div class="poker-dare-card glass">
+          <p class="poker-dare-title">色令</p>
+          <p class="poker-dare-body"></p>
+          <p class="poker-dare-hint"></p>
+          <button type="button" id="poker-dare-ok" class="btn-primary">做完了 · 继续</button>
+        </div>
       </div>
     </section>
 
@@ -665,6 +754,7 @@
   <script src="erotica.js"></script>
   <script src="erotica-extra.js"></script>
   <script src="erotica-extra-b.js"></script>
+  <script src="erotica-extra-c.js"></script>
   <script src="fantasy-packs.js"></script>
   <script src="galgame-campus.js"></script>
   <script src="galgame-characters.js"></script>
@@ -686,10 +776,12 @@
   <script src="galgame-orion-ui.js"></script>
   <script src="galgame-orion.js"></script>
   <script src="galgame-orion-guards.js"></script>
+  <script src="galgame-orion-h-premium.js"></script>
   <script src="galgame.js"></script>
   <script src="profile.js"></script>
   <script src="voice.js"></script>
   <script src="sync.js"></script>
+  <script src="poker.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

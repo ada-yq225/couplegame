@@ -90,10 +90,16 @@ function orionPickSense(weather, place) {
 }
 
 function orionFormatParagraphs(text) {
-  return orionEscapeHtml(galFill(text))
-    .split(/\n\n+/)
-    .filter(Boolean)
-    .map((p) => `<p class="orion-para">${p.replace(/\n/g, "<br>")}</p>`)
+  const filled = galFill(text || "");
+  const parts =
+    typeof splitReadableParagraphs === "function"
+      ? splitReadableParagraphs(filled, 52)
+      : String(filled)
+          .split(/\n\n+/)
+          .map((p) => p.trim())
+          .filter(Boolean);
+  return parts
+    .map((p) => `<p class="orion-para">${orionEscapeHtml(p).replace(/\n/g, "<br>")}</p>`)
     .join("");
 }
 
@@ -148,7 +154,13 @@ function orionAdvanceHPhase() {
 }
 
 function orionSplitBodyParagraphs(body) {
-  return String(body || "").split(/\n\n+/).filter((x) => x.trim());
+  if (typeof splitReadableParagraphs === "function") {
+    return splitReadableParagraphs(body, 52);
+  }
+  return String(body || "")
+    .split(/\n\n+/)
+    .map((x) => x.trim())
+    .filter(Boolean);
 }
 
 function orionBuildHPhaseHtml(event) {
